@@ -15,7 +15,7 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | DONE |
 | SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | DONE |
 | SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | IN PROGRESS |
-| SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | IN PROGRESS |
+| SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | DONE |
 | SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | TODO |
 | SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
@@ -172,3 +172,7 @@ IR reproduces the `mlp_block_0` and `attention_0` images (weights, LUTs, M, s) a
 fixture goldens bit-exactly; float tolerance vs PyTorch with per-segment gain/RMS checks (C4 level 6); unsupported
 ops rejected by name; tests marked `torch`.
 Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m torch tests/frontend`
+
+Done. From torch, both fixtures' graph IR equals the images (weights, LUTs, M, s, scales) and the goldens bit-exactly.
+Open for SG5: multi-head needs head-batched or per-head graph ops (capture works, quantize raises); the full-Block
+tolerance is still to be derived (measured ≈ 2.4 LSB on 1–2 stacked Blocks).
