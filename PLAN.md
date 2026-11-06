@@ -13,7 +13,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | DONE |
 | SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | IN PROGRESS |
-| SG3 | Tensor IR lowering and schedule primitives | M3 | SG1, SG2 | TODO |
+| SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | IN PROGRESS |
+| SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | TODO |
 | SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
 | SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
@@ -126,3 +127,27 @@ attention launch chains on isasim with golden-equal memory; hypothesis-generated
 register pressure above 12 spill and still equal the MIR interpreter on isasim; idioms equal `anvil.semantics`;
 oversize programs fail with the size error; a small set of RTL runs (marked `rtl`) confirms isasim == RTL.
 Verify: `make check && python3 -m pytest -q -m rtl tests/backend`
+
+### SG3a — Graph → tensor lowering and schedule primitives
+`anvil.lower.graph_to_tensor`: each graph op → a default loop nest in `anvil.tensor` (matmul/qlinear with fused
+requant and LUT epilogue, lut, lut_mul, rmsnorm_int, softmax_lut with causal mask, add_requant, transpose, reshape as
+a view). `anvil.schedule`: primitives as tensor-IR rewrites with legality checks: split, reorder, fuse, tile, bind
+(block | warp | lane, respecting `THREADS_PER_BLOCK`, `WARPS_PER_CORE` and the 255-thread launch limit), cache_read
+to smem (with barrier insertion and a 64-word/`WARPS_PER_CORE` budget check), compute_at, unroll, pad-vs-mask for
+ragged edges, cross-lane reductions through smem + barrier. A `Schedule` object records the primitive trace so a
+tuner can replay it. Extend the tensor interpreter for nested warp × lane barriers (SG1 open issue 1).
+Accept: every graph op on both fixtures lowers and interprets bit-exactly to the graph interpreter; hypothesis tests
+apply random legal primitive sequences to every op and stay bit-exact (C4 level 2); illegal schedules (smem over
+budget, bad binding, > 255 threads per launch) are rejected with clear errors; hand schedules that mirror
+`matmul_tiled.asm` (4×4 tile staged in smem) and `matmul_naive.asm` exist as named templates.
+Verify: `make check`
+
+### SG3b — Tensor → MIR lowering
+Codegen from bound tensor loop nests to `anvil.mir` through SG2's idiom library: index arithmetic, block-uniform
+counted loops (equality exits only), predication strategy per region (uniform, arithmetic mask, or `SYNC`
+divergence when `SIMT_STACK=1`, with a stack-depth ≤ 8 proof), barriers, args-block layout per launch, launch
+splitting above 255 threads. Then `compile_mir` and run.
+Accept: every op × a grid of schedules × `WARPS_PER_CORE` 1/2/4 × `SIMT_STACK` 0/1 is bit-exact on isasim with no
+race/divergence flags (C4 level 3–4); the two matmul templates run on Verilator and their cycles are reported next
+to the hand kernels'; a sample is checked on iverilog RTL.
+Verify: `make check && python3 -m pytest -q -m rtl tests/codegen`
