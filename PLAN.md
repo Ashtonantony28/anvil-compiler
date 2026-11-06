@@ -14,9 +14,9 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | DONE |
 | SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | DONE |
-| SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | IN PROGRESS |
+| SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | DONE |
 | SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | DONE |
-| SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | TODO |
+| SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | IN PROGRESS |
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | IN PROGRESS |
 | SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
@@ -162,6 +162,10 @@ race/divergence flags (C4 level 3–4); the two matmul templates run on Verilato
 to the hand kernels'; a sample is checked on iverilog RTL.
 Verify: `make check && python3 -m pytest -q -m rtl tests/codegen`
 
+Done. Untuned default/template schedules already beat the hand chain: tiled MLP chain 34,046 vs 40,329 cycles (0.84×),
+naive 44,422 vs 47,610 (`docs/codegen-bench.md`). Open: programs near 256 words at wide configs; masked smem stores
+need one spare smem word at SIMT_STACK=0; rsqrt loop runs worst-case trips; elementwise ~6 % slower (constant remat).
+
 ### SG4a — Frontend: capture and quantization
 `anvil.frontend.capture(module, example_inputs)` via `torch.export` (pinned torch) → decomposition to a small op set
 (linear, matmul, RMSNorm, SiLU/SwiGLU, softmax with causal mask, add, reshape/view/transpose) with a clear error for
@@ -187,3 +191,13 @@ bounds recorded as a contract for SG5b. Check the overflow proof and the 16-bit 
 Accept: graph interpreter = tensor interpreter (default schedules) bit-exactly on the target model; derived tolerance
 holds on ≥ 20k held-out inputs; n_head ∈ {1, 2, 4} captured and quantized; tests marked `torch` where needed.
 Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m torch tests/frontend tests/model`
+
+### SG4b — Memory plan, compile driver, G1 on RTL
+`anvil.compile(module_or_graph, example_inputs, calib_inputs, params, schedules=None) -> CompiledModel` with
+`run(x, backend)`: liveness-based static memory planner (activations reuse dead buffers, weights/LUTs packed, args
+blocks + scratch/sink/spill after; checks the address-space size and reports the footprint), launch chain assembly,
+input/output (de)quantization helpers. Replaces `bump_allocate` in the main path.
+Accept (G1): nanoGPT `Block` → `anvil.compile` → RTL (iverilog) for the MLP block and the attention head: memory
+golden-equal to the xf fixtures and within contract-8 tolerances vs PyTorch, with no hand-written assembly; planned
+footprint ≤ the xf images' sizes; Verilator cycle table for the compiled chains next to the hand chains.
+Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" tests/driver`
