@@ -40,7 +40,8 @@ Passes (in order)
    entry from a minimal CONST/MUL/ADD/SUB plan (CSE + hoisting; `consts`);
 3. dead code elimination;
 4. register allocation onto R0-R11 (+R12) with rematerialization of constants and memory spills (`regalloc`);
-5. peephole cleanups (`emit.peephole`);
+5. dead-definition removal on the allocated code (entry constants every use rematerialized), peephole
+   cleanups (`emit.peephole`);
 6. ARGS prologue, label resolution, 256-word size check (`ProgramTooLarge`, naming the overflow), encode via
    `anvil.ir.mir.encode`.
 
@@ -102,15 +103,20 @@ def _sregs(code: list[Ins], fresh: Fresh) -> list[Ins]:
     return out
 
 
-def dce(code: list[Ins]) -> tuple[list[Ins], int]:
+def dce(code: list[Ins], track=is_virtual) -> tuple[list[Ins], int]:
+    """Remove pure instructions whose destination (a register `track` accepts) is dead."""
     removed = 0
     while True:
-        _, lout = liveness(code, is_virtual)
-        keep = [i for k, i in enumerate(code) if not (i.op in PURE and is_virtual(i.d) and i.d not in lout[k])]
+        _, lout = liveness(code, track)
+        keep = [i for k, i in enumerate(code) if not (i.op in PURE and track(i.d) and i.d not in lout[k])]
         if len(keep) == len(code):
             return code, removed
         removed += len(code) - len(keep)
         code = keep
+
+
+def _gpr(r) -> bool:
+    return r is not None and r.startswith("R") and int(r[1:]) <= 12
 
 
 def compile_mir(module, *, args_base: int, spill_slot: int | None = None, reuse_args_reg: bool = True,
@@ -134,6 +140,8 @@ def compile_mir(module, *, args_base: int, spill_slot: int | None = None, reuse_
     alloc = Allocator(code, args=args, const_vals=const_vals, fresh=fresh, spill_slot=spill_slot,
                       reuse_args_reg=reuse_args_reg)
     code = alloc.run()
+    # constants hoisted to entry by `consts` but rematerialized at every use leave dead entry definitions
+    code, dead_phys = dce(code, _gpr)
     removed = 0
     if peephole:
         code, removed = emit.peephole(code)
@@ -144,7 +152,7 @@ def compile_mir(module, *, args_base: int, spill_slot: int | None = None, reuse_
     stats = {
         "words": len(words), "prologue_words": PROLOGUE_WORDS, "body_words": body,
         "input_instrs": sum(i.op != "label" for i in lift(f)),
-        "const_values": len(const_vals), "dead_removed": dead, "peephole_removed": removed,
+        "const_values": len(const_vals), "dead_removed": dead + dead_phys, "peephole_removed": removed,
         "alloc_rounds": s.rounds, "spilled_vregs": len(s.spilled), "remat_vregs": len(s.remat),
         "spill_loads": s.spill_loads, "spill_stores": s.spill_stores, "remat_instrs": s.remat_instrs,
         "frame_words": s.frame_words, "regs_used": s.regs_used,

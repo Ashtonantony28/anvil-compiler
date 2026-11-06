@@ -12,7 +12,8 @@ class Target:
     warps_per_core: int = 1         # WARPS_PER_CORE: a block is this many warps of consecutive threads
     num_cores: int = 2              # NUM_CORES (blocks are dispatched across cores; no schedule limit)
     smem_words: int = 64            # core.SMEM_SIZE, per block, shared by its warps
-    max_threads: int = 255          # 8-bit thread count per launch
+    max_threads: int = 255          # blocks x threads_per_block per kernel; 255 = one launch (8-bit thread count).
+                                    # Raise it to let anvil.codegen split the block loop over several launches.
     max_reg_words: int = 8          # register-buffer words per thread (13 GPRs minus addressing/temps)
 
     def __post_init__(self):

@@ -46,7 +46,8 @@ def _plan(v: int) -> tuple[tuple[int, tuple], ...]:
     if v < 65536 or v & (v - 1) == 0:                           # products of two smaller values
         if v & (v - 1) == 0:
             k = v.bit_length() - 1
-            cand(("mul", 1 << (k // 2), 1 << (k - k // 2)), 1 << (k // 2), 1 << (k - k // 2))
+            for j in range(1, k // 2 + 1):                       # every split, so factors can share nodes
+                cand(("mul", 1 << j, 1 << (k - j)), 1 << j, 1 << (k - j))   # (2^21 = 128 * 128 * 128)
         for a in range(2, 256):
             if v % a == 0 and a <= v // a < 256:
                 cand(("mul", a, v // a), a, v // a)
