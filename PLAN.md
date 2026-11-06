@@ -15,7 +15,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | DONE |
 | SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | DONE |
 | SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | IN PROGRESS |
-| SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
+| SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | IN PROGRESS |
+| SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | TODO |
 | SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | TODO |
@@ -159,3 +160,15 @@ Accept: every op × a grid of schedules × `WARPS_PER_CORE` 1/2/4 × `SIMT_STACK
 race/divergence flags (C4 level 3–4); the two matmul templates run on Verilator and their cycles are reported next
 to the hand kernels'; a sample is checked on iverilog RTL.
 Verify: `make check && python3 -m pytest -q -m rtl tests/codegen`
+
+### SG4a — Frontend: capture and quantization
+`anvil.frontend.capture(module, example_inputs)` via `torch.export` (pinned torch) → decomposition to a small op set
+(linear, matmul, RMSNorm, SiLU/SwiGLU, softmax with causal mask, add, reshape/view/transpose) with a clear error for
+anything else → `anvil.frontend.quantize(graph, calib_inputs, headroom=1.5)` producing `anvil.graph` IR: symmetric
+per-tensor int8 scales, (M, s) via a generalized `fixed_point`, LUTs (SiLU, exp, rsqrt) built as `xf/export.py`
+builds them, and an overflow proof (generalized `check_bounds`) that raises if any int32 intermediate can overflow.
+Accept: on the nanoGPT Extended `Block` built exactly as `xf/export.py::build_block` builds it, the quantized graph
+IR reproduces the `mlp_block_0` and `attention_0` images (weights, LUTs, M, s) and, through the graph interpreter, the
+fixture goldens bit-exactly; float tolerance vs PyTorch with per-segment gain/RMS checks (C4 level 6); unsupported
+ops rejected by name; tests marked `torch`.
+Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m torch tests/frontend`
