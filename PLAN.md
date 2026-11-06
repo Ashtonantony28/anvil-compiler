@@ -17,7 +17,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | IN PROGRESS |
 | SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | DONE |
 | SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | TODO |
-| SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
+| SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | IN PROGRESS |
+| SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | TODO |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | TODO |
@@ -176,3 +177,13 @@ Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m torch tests/front
 Done. From torch, both fixtures' graph IR equals the images (weights, LUTs, M, s, scales) and the goldens bit-exactly.
 Open for SG5: multi-head needs head-batched or per-head graph ops (capture works, quantize raises); the full-Block
 tolerance is still to be derived (measured ≈ 2.4 LSB on 1–2 stacked Blocks).
+
+### SG5a — Multi-head and the full Block above codegen
+Extend `anvil.graph` (head-batched `qmatmul`/softmax, or per-head ops with merge) so `from_torch` quantizes nanoGPT
+Extended Blocks with `n_head > 1`; lower the new ops to tensor IR with default schedules. Build the target model
+(d=32, 2 heads, T=16, 2 stacked Blocks with residuals, `pos_embedding='none'`, RMSNorm, SwiGLU) and derive its
+end-to-end tolerance from calibration plus held-out data that tuning never sees (fresh seed), with per-segment gain/RMS
+bounds recorded as a contract for SG5b. Check the overflow proof and the 16-bit address footprint of the image.
+Accept: graph interpreter = tensor interpreter (default schedules) bit-exactly on the target model; derived tolerance
+holds on ≥ 20k held-out inputs; n_head ∈ {1, 2, 4} captured and quantized; tests marked `torch` where needed.
+Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m torch tests/frontend tests/model`
