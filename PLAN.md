@@ -11,8 +11,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | ID | Sub-goal | Milestone | Depends on | Status |
 |---|---|---|---|---|
 | SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | IN PROGRESS |
-| SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | IN PROGRESS |
-| SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | TODO |
+| SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
+| SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | IN PROGRESS |
 | SG3 | Tensor IR lowering and schedule primitives | M3 | SG1, SG2 | TODO |
 | SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
 | SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
@@ -103,3 +103,20 @@ Accept: graph IR for the MLP block and the attention head, built by hand from th
 bit-exactly to `xf.golden` (`export.mlp_block_int`, `attention.attention_int`); round-trip property tests per dialect;
 tensor and MIR interpreters pass hand-written unit programs.
 Verify: `make check`
+
+### SG2 — Backend: MIR → assembly
+Passes over `anvil.mir`: (a) idiom library as MIR builders, each checked against `anvil.semantics` on random values:
+neg, min, clamp-to-int8, abs, signed less-than and select via arithmetic masks (no signed CMP, no logic ops),
+requant `(acc*M + 2^(s-1)) >>> s` with clamp, `x * 2^k`, wide address arithmetic; (b) `const32` materialization
+(`CONST hi`, `MUL 256`, `ADD lo` chains, sign handling at 32 bits) with rematerialization and CSE of constants;
+(c) liveness over the CFG (labels, `br`, `sync`), register allocation onto R0–R11 (R12 is the args pointer set by
+the ARGS prologue, R13–R15 read-only) with spilling to a per-thread scratch area in global memory whose base comes from
+the args block, and spill-cost heuristics (loop depth); (d) peephole cleanups; (e) label resolution, the 256-word
+program limit (clear error naming the overflow), the ARGS prologue compatible with `xf.kernels.program` patching,
+and `encode()` to words. Entry point `anvil.backend.compile_mir(module, *, args_base) -> Program(words, asm_text,
+stats)`.
+Accept: every xf kernel decoded to MIR, de-allocated to virtual registers and re-compiled, runs the full mlp and
+attention launch chains on isasim with golden-equal memory; hypothesis-generated straight-line and loop programs with
+register pressure above 12 spill and still equal the MIR interpreter on isasim; idioms equal `anvil.semantics`;
+oversize programs fail with the size error; a small set of RTL runs (marked `rtl`) confirms isasim == RTL.
+Verify: `make check && python3 -m pytest -q -m rtl tests/backend`
