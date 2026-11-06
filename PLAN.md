@@ -10,7 +10,7 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 
 | ID | Sub-goal | Milestone | Depends on | Status |
 |---|---|---|---|---|
-| SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | IN PROGRESS |
+| SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | DONE |
 | SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | IN PROGRESS |
 | SG3 | Tensor IR lowering and schedule primitives | M3 | SG1, SG2 | TODO |
@@ -51,7 +51,8 @@ class GpuParams:                       # names and defaults = sim/src/gpu.sv par
     NUM_CORES: int = 2; THREADS_PER_BLOCK: int = 4; ICACHE_LINES: int = 0; COALESCE: int = 0
     PIPELINED: int = 0; DCACHE_LINES: int = 0; MEDIC: int = 0; WARPS_PER_CORE: int = 1
     WARP_POLICY: int = 0; SIMT_STACK: int = 0
-    def plusargs(self) -> list[str]     # "-Pgpu.NAME=V" for every non-default field
+    def plusargs(self) -> list[str]     # "-Pgpu.NAME=V" for every field that differs from gpu.sv's default,
+                                        # so GpuParams() alone builds the xf GPU (= the Makefile's XF_PARAMS)
 
 @dataclass
 class Launch:  program: list[int]; threads: int          # 16-bit words, 1..255 threads
@@ -66,7 +67,8 @@ class RunResult:
     launches: list[LaunchResult]
     flags: dict                        # isasim only: divergent, stores_conflict, store_races, race_words
 
-def run(job: Job, backend: str = "isasim") -> RunResult   # "isasim" | "rtl" | "verilator"
+def run(job: Job, backend: str = "isasim", *, timeout_cycles: int = 2_000_000) -> RunResult
+                                       # "isasim" | "rtl" | "verilator"; isasim maps GTLRR to gto
 ```
 Memory persists across launches, the GPU resets between them (as `sim/test/helpers/runner.py::run_launches`).
 RTL builds are cached per `GpuParams` under `.anvil-cache/`. The RTL backend reuses the simulator's own cocotb helpers.
@@ -84,6 +86,10 @@ a test at the level it touches; `make check` (no RTL, no torch) stays under 5 mi
 ## Sub-goals
 
 ### SG0 — Runtime and Verilator spike
+Done: Verilator adopted (ADR-001). It matches iverilog on memory, per-launch cycles and every counter across the
+xf-bench configs, all 37 32-bit ISA fixtures and 11 matrix-style configurations, at 260–345× the speed (≈2.4M
+simulated cycles/s). Verilator is the default timing backend for SG6+; iverilog stays the reference.
+
 C2 as code. `isasim` backend wraps `xf.isasim.run` per launch on one memory. `rtl` backend: a generic cocotb test
 module that loads a Job from a JSON file named by an env var, runs every launch with the simulator's helpers and
 writes a result JSON; `run()` builds (sv2v → iverilog) once per params and invokes vvp. `verilator` backend: build the
