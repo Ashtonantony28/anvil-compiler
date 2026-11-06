@@ -13,8 +13,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | DONE |
 | SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
 | SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | DONE |
-| SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | IN PROGRESS |
-| SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | TODO |
+| SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | DONE |
+| SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | IN PROGRESS |
 | SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
 | SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
@@ -146,6 +146,9 @@ apply random legal primitive sequences to every op and stay bit-exact (C4 level 
 budget, bad binding, > 255 threads per launch) are rejected with clear errors; hand schedules that mirror
 `matmul_tiled.asm` (4×4 tile staged in smem) and `matmul_naive.asm` exist as named templates.
 Verify: `make check`
+
+Done. Canonical form for codegen: `anvil/schedule/__init__.py`. Open: ragged M in `matmul_tiled`, conservative `pad`
+legality, affine maps unsimplified, launch splitting not yet (255-thread limit enforced at bind).
 
 ### SG3b — Tensor → MIR lowering
 Codegen from bound tensor loop nests to `anvil.mir` through SG2's idiom library: index arithmetic, block-uniform
