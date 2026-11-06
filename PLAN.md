@@ -12,7 +12,7 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 |---|---|---|---|---|
 | SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | DONE |
 | SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | DONE |
-| SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | IN PROGRESS |
+| SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | DONE |
 | SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | IN PROGRESS |
 | SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | TODO |
 | SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
@@ -127,6 +127,11 @@ attention launch chains on isasim with golden-equal memory; hypothesis-generated
 register pressure above 12 spill and still equal the MIR interpreter on isasim; idioms equal `anvil.semantics`;
 oversize programs fail with the size error; a small set of RTL runs (marked `rtl`) confirms isasim == RTL.
 Verify: `make check && python3 -m pytest -q -m rtl tests/backend`
+
+Done. Deviation accepted: R12 is allocatable after the args pointer's last read (`reuse_args_reg=True`), otherwise
+`matmul_tiled` needs 13 registers. Anvil ABI v1 (spill frames per thread from `args[spill_slot]`) is documented in
+`anvil/backend/__init__.py`. Recompiled xf kernels are within 6 % of hand-written size (tiled matmul 215 vs 203 words,
+constants rebuilt at each use; follow-up for SG6). No xf kernel spills.
 
 ### SG3a — Graph → tensor lowering and schedule primitives
 `anvil.lower.graph_to_tensor`: each graph op → a default loop nest in `anvil.tensor` (matmul/qlinear with fused

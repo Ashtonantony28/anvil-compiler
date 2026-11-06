@@ -1,9 +1,16 @@
 """Integer interpreter for anvil.tensor: loop nests over numpy buffers, scalars through anvil.semantics.
 
 Loops run sequentially in iteration order whatever their binding, which is the semantics a schedule must
-preserve. Parallel loops (bind warp | lane) whose body holds top-level barriers run phase by phase: every iteration
-runs up to the first barrier, then every iteration runs to the next, and so on, each iteration keeping its own
-registers. That is exactly the BAR contract, so a schedule that stages through SMEM is checked here as on the GPU.
+preserve. Parallel loops (bind warp | lane) that contain a barrier anywhere below them (directly, or inside seq loops,
+or inside nested warp x lane loops) run phase by phase, as BAR does on the GPU: every thread (one iteration of each
+enclosing parallel loop, with its own registers) runs up to its next barrier; once every thread of the block waits,
+they all continue. A barrier only some threads reach (inside a guard) is a divergence error. Outside any parallel loop
+a barrier is a no-op.
+
+Race check (on by default): inside one block's parallel loops, within one barrier phase, a thread reading an smem or
+global word another thread stored, two threads storing different values to one word, or a thread overwriting with a
+different value a word another thread read, raises TensorInterpError. These are exactly the orderings the GPU leaves
+unspecified (lanes in lockstep, warps interleaved), so a schedule that passes here does not depend on issue order.
 """
 import numpy as np
 
@@ -11,6 +18,7 @@ from .. import semantics as sem
 from ..ir import tensor as t
 
 PARALLEL = ("warp", "lane")
+_TID, _TRK = "__tid__", "__trk__"
 
 
 class TensorInterpError(RuntimeError):
@@ -30,9 +38,52 @@ def _i(attr):
     return int(attr.value.data)
 
 
+class _Tracker:
+    """Accesses of one block's threads to shared words (smem and global) within the current barrier phase."""
+
+    def __init__(self):
+        self.words = {}             # (id(buf), idx) -> [last writer tid | None, readers set]
+
+    def new_phase(self):
+        self.words.clear()
+
+    def read(self, buf, idx, tid, what):
+        rec = self.words.get((id(buf), idx))
+        if rec is None:
+            self.words[(id(buf), idx)] = [None, {tid}]
+            return
+        if rec[0] is not None and rec[0] != tid:
+            raise TensorInterpError(f"race: {what} {list(idx)} read by thread {tid} after thread {rec[0]} stored it "
+                                    f"in the same barrier phase")
+        rec[1].add(tid)
+
+    def write(self, buf, idx, tid, value, what):
+        key = (id(buf), idx)
+        rec = self.words.get(key)
+        if rec is None:
+            self.words[key] = [tid, set()]
+            return
+        same = int(buf[idx]) == int(value)
+        if rec[0] is not None and rec[0] != tid and not same:
+            raise TensorInterpError(f"race: threads {rec[0]} and {tid} store different values to {what} {list(idx)} "
+                                    f"in the same barrier phase")
+        if not same and any(r != tid for r in rec[1]):
+            raise TensorInterpError(f"race: thread {tid} overwrites {what} {list(idx)} that another thread read in "
+                                    f"the same barrier phase")
+        rec[0] = tid
+
+
 class _Interp:
-    def __init__(self, buffers):
+    def __init__(self, buffers, check_races=True):
         self.buffers = buffers
+        self.check_races = check_races
+        self._bar = {}
+
+    def has_barrier(self, op):
+        k = id(op)
+        if k not in self._bar:
+            self._bar[k] = any(isinstance(o, t.BarrierOp) for o in op.walk())
+        return self._bar[k]
 
     def index(self, env, op):
         idx = op.map.data.eval([env[v] for v in op.indices], [])
@@ -45,6 +96,9 @@ class _Interp:
         if t.dtype_of(buf_type) == "i8":
             sem.check_i8(value, what)
         return sem.check_i32(value, what)
+
+    def _tracked(self, env, op):
+        return self.check_races and _TRK in env and t.space_of(op.buf.type) != "reg"
 
     def block(self, ops, env):
         for op in ops:
@@ -68,17 +122,28 @@ class _Interp:
                 env[op.result] = np.zeros(shape, dtype=np.int64)
         elif isinstance(op, t.ForOp):
             self.loop(op, env)
+        elif isinstance(op, t.GuardOp):
+            if self.guard(op, env):
+                self.block(op.body.block.ops, env)
         elif isinstance(op, t.LoadOp):
-            env[op.result] = np.int64(v(op.buf)[self.index(env, op)])
+            idx = self.index(env, op)
+            if self._tracked(env, op):
+                env[_TRK].read(v(op.buf), idx, env[_TID], f"{t.space_of(op.buf.type)} word")
+            env[op.result] = np.int64(v(op.buf)[idx])
         elif isinstance(op, t.StoreOp):
             val = self.store_value(op.buf.type, v(op.value), f"store to {op.buf.type}")
-            v(op.buf)[self.index(env, op)] = val
+            idx = self.index(env, op)
+            if self._tracked(env, op):
+                env[_TRK].write(v(op.buf), idx, env[_TID], val, f"{t.space_of(op.buf.type)} word")
+            v(op.buf)[idx] = val
         elif isinstance(op, t.GatherOp):
             env[op.result] = np.int64(sem.lut_lookup(v(op.buf), v(op.idx), _i(op.offset)))
         elif isinstance(op, t.ConstOp):
             env[op.result] = sem.check_i32(_i(op.value), "const")
         elif isinstance(op, t.CastOp):
             env[op.result] = sem.check_i32(v(op.x), "cast")
+        elif isinstance(op, t.ApplyOp):
+            env[op.result] = sem.check_i32(op.map.data.eval([env[x] for x in op.indices], [])[0], "apply")
         elif isinstance(op, t.AddOp):
             env[op.result] = sem.add_i32(v(op.lhs), v(op.rhs))
         elif isinstance(op, t.SubOp):
@@ -108,39 +173,93 @@ class _Interp:
         else:
             raise NotImplementedError(op.name)
 
+    def guard(self, op, env):
+        vals = op.map.data.eval([env[x] for x in op.indices], [])
+        return all(x < u for x, u in zip(vals, op.ub_list))
+
+    # -------------------------------------------------------------------------------------------- loops
+
+    def _thread_env(self, env, op, i):
+        e = dict(env)
+        e[op.iv] = i
+        e[_TID] = env.get(_TID, ()) + (i,)
+        return e
+
     def loop(self, op, env):
         lb, ub, step = op.bounds
         ops = list(op.body.block.ops)
         iters = range(lb, ub, step)
-        if op.bind.data in PARALLEL:
-            for o in ops:
-                for inner in o.walk():
-                    if inner is not o and isinstance(inner, t.BarrierOp):
-                        raise TensorInterpError("a barrier below the top level of a parallel loop is not modelled")
-        if op.bind.data in PARALLEL and any(isinstance(o, t.BarrierOp) for o in ops):
-            phases, cur = [], []
-            for o in ops:
-                if isinstance(o, t.BarrierOp):
-                    phases.append(cur)
-                    cur = []
-                else:
-                    cur.append(o)
-            phases.append(cur)
-            envs = [dict(env) for _ in iters]
-            for e, i in zip(envs, iters):
-                e[op.iv] = i
-            for ph in phases:
-                for e in envs:
-                    self.block(ph, e)
+        if op.bind.data not in PARALLEL:
+            for i in iters:
+                env[op.iv] = i
+                self.block(ops, env)
             return
-        for i in iters:
-            env[op.iv] = i
-            self.block(ops, env)
+        own = _TRK not in env
+        if own:
+            env[_TRK] = _Tracker()
+        try:
+            if self.has_barrier(op):
+                children = [self.gblock(ops, self._thread_env(env, op, i)) for i in iters]
+                for _ in self.drive(children):
+                    env[_TRK].new_phase()
+            else:
+                tid = env.get(_TID, ())
+                for i in iters:
+                    env[op.iv], env[_TID] = i, tid + (i,)
+                    self.block(ops, env)
+                if tid:
+                    env[_TID] = tid
+                else:
+                    env.pop(_TID, None)
+        finally:
+            if own:
+                env.pop(_TRK, None)
+
+    def drive(self, children):
+        """Run threads to their next barrier, together; yield once per block-wide barrier."""
+        live = children
+        while True:
+            waiting, done = [], 0
+            for c in live:
+                try:
+                    next(c)
+                    waiting.append(c)
+                except StopIteration:
+                    done += 1
+            if not waiting:
+                return
+            if done:
+                raise TensorInterpError(f"barrier divergence: {len(waiting)} threads wait at a barrier that "
+                                        f"{done} finished threads never reach")
+            yield
+            live = waiting
+
+    def gblock(self, ops, env):
+        for op in ops:
+            if isinstance(op, t.BarrierOp):
+                yield
+            elif isinstance(op, t.ForOp) and self.has_barrier(op):
+                yield from self.gloop(op, env)
+            elif isinstance(op, t.GuardOp) and self.has_barrier(op):
+                if self.guard(op, env):
+                    yield from self.gblock(list(op.body.block.ops), env)
+            else:
+                self.op(op, env)
+
+    def gloop(self, op, env):
+        lb, ub, step = op.bounds
+        ops = list(op.body.block.ops)
+        if op.bind.data in PARALLEL:
+            yield from self.drive([self.gblock(ops, self._thread_env(env, op, i)) for i in range(lb, ub, step)])
+        else:
+            for i in range(lb, ub, step):
+                env[op.iv] = i
+                yield from self.gblock(ops, env)
 
 
-def run(m, buffers: dict) -> dict:
+def run(m, buffers: dict, *, check_races: bool = True) -> dict:
     """Run the func; `buffers` binds global allocs by sym (missing ones start at zero). Returns the buffers,
     as int64 arrays, updated in place."""
     buffers = {k: np.array(v, dtype=np.int64) for k, v in buffers.items()}
-    _Interp(buffers).block(list(_func(m).body.block.ops), {})
+    _Interp(buffers, check_races).block(list(_func(m).body.block.ops), {})
     return buffers

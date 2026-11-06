@@ -173,13 +173,68 @@ def test_barrier_phases_make_neighbour_writes_visible():
     assert _both(b.module(), {})["out"].tolist() == [20, 30, 40, 10]
 
 
-def test_nested_barrier_is_rejected():
+def test_barrier_below_nested_warp_lane_and_seq_loops():
+    """SG1 open issue 1: barriers inside seq loops under warp x lane loops sync every thread of the block."""
     b = TensorBuilder("nested")
-    with b.loop(0, 4, bind="lane"):
-        with b.loop(0, 2):
-            b.barrier()
-    with pytest.raises(ti.TensorInterpError):
+    out = b.alloc("out", [3, 8])
+    buf = b.alloc(None, [8], "i32", "smem")
+    with b.loop(0, 2, bind="warp") as w:
+        with b.loop(0, 4, bind="lane") as l:
+            with b.loop(0, 3) as r:                     # each round: write own slot, BAR, read neighbour, BAR
+                tid = lambda w, l: (w * 4 + l,)  # noqa: E731
+                v = b.add(b.apply([w, l], lambda w, l: (w * 4 + l,)), b.mul(b.cast(r), b.const(100)))
+                b.store(v, buf, [w, l], tid)
+                b.barrier()
+                b.store(b.load(buf, [w, l], lambda w, l: ((w * 4 + l + 3) % 8,)), out, [r, w, l],
+                        lambda r, w, l: (r, w * 4 + l))
+                b.barrier()
+    got = _both(b.module(), {})["out"]
+    assert got.tolist() == [[(t + 3) % 8 + 100 * r for t in range(8)] for r in range(3)]
+
+
+def test_missing_barrier_is_a_race():
+    b = TensorBuilder("racy")
+    out = b.alloc("out", [4])
+    buf = b.alloc(None, [4], "i32", "smem")
+    with b.loop(0, 4, bind="lane") as j:
+        b.store(b.add(b.cast(j), b.const(1)), buf, [j])
+        b.store(b.load(buf, [j], lambda j: ((j + 1) % 4,)), out, [j])
+    with pytest.raises(ti.TensorInterpError, match="race"):
         ti.run(b.module(), {})
+    ti.run(b.module(), {}, check_races=False)       # sequential reading, no check
+
+
+def test_conflicting_global_stores_are_a_race():
+    b = TensorBuilder("conflict")
+    out = b.alloc("out", [1])
+    with b.loop(0, 2, bind="lane") as j:
+        b.store(b.cast(j), out, [j], lambda j: (0,))
+    with pytest.raises(ti.TensorInterpError, match="different values"):
+        ti.run(b.module(), {})
+    b = TensorBuilder("same")                         # identical values from several lanes are fine (pad tails)
+    out = b.alloc("out", [1])
+    with b.loop(0, 2, bind="lane") as j:
+        b.store(b.const(5), out, [j], lambda j: (0,))
+    assert ti.run(b.module(), {})["out"].tolist() == [5]
+
+
+def test_barrier_in_guard_diverges():
+    b = TensorBuilder("diverge")
+    with b.loop(0, 4, bind="lane") as j:
+        with b.guard([j], lambda j: (j,), [2]):
+            b.barrier()
+    with pytest.raises(ti.TensorInterpError, match="divergence"):
+        ti.run(b.module(), {})
+
+
+def test_guard_and_apply():
+    b = TensorBuilder("guard")
+    out = b.alloc("out", [6])
+    with b.loop(0, 2) as o:
+        with b.loop(0, 4) as i:
+            with b.guard([o, i], lambda o, i: (o * 4 + i,), [6]):
+                b.store(b.apply([o, i], lambda o, i: (o * 40 + i * 10,)), out, [o, i], lambda o, i: (o * 4 + i,))
+    assert _both(b.module(), {})["out"].tolist() == [0, 10, 20, 30, 40, 50]
 
 
 def test_errors_surface():

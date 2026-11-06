@@ -14,17 +14,22 @@ Scalar data is i32 with checked int32 semantics (anvil.semantics); i8 buffers st
     gather (buf, v) {offset}            -> i32   buf[v + offset], data-dependent (LUTs)
     const  {value}                      -> i32
     cast   (index)                      -> i32
+    apply  (idx...) {map}               -> i32   one-result affine map of indices as a scalar (causal masks)
+    guard  (idx...) {map, ub}                    region runs iff map(idx)[r] < ub[r] for every r (ragged-edge mask)
     add sub mul max min div sra (a, b)  -> i32   checked int32 (div: floor of non-negatives)
     cmp    (a, b) {pred}                -> i32   0/1, signed
     select (c, a, b)                    -> i32
     requant (acc[, extra]) {M, s}       -> i32   golden.requant with shift s (+ extra)
     rsqrt_index (ss) {n}                -> i32, i32
     barrier                                      all lanes/warps of the block (BAR)
+
+Barriers may sit anywhere below a block's warp x lane loops (also inside seq loops there), never inside a guard.
 """
 from collections.abc import Sequence
 
 from xdsl.dialects.builtin import (
     AffineMapAttr,
+    DenseArrayBase,
     IndexType,
     IntegerAttr,
     IntegerType,
@@ -296,9 +301,38 @@ class BarrierOp(IRDLOperation):
     name = "anvil.tensor.barrier"
 
 
+@irdl_op_definition
+class ApplyOp(IRDLOperation):
+    name = "anvil.tensor.apply"
+    indices = var_operand_def(IndexType)
+    map = prop_def(AffineMapAttr)
+    result = result_def(i32)
+
+    def verify_(self):
+        _check_map(self, self.map.data, len(self.indices), 1)
+
+
+@irdl_op_definition
+class GuardOp(IRDLOperation):
+    name = "anvil.tensor.guard"
+    indices = var_operand_def(IndexType)
+    map = prop_def(AffineMapAttr)
+    ub = prop_def(DenseArrayBase)
+    body = region_def("single_block")
+    traits = traits_def(NoTerminator())
+
+    @property
+    def ub_list(self) -> list[int]:
+        return [int(x) for x in self.ub.get_values()]
+
+    def verify_(self):
+        _check_map(self, self.map.data, len(self.indices), len(self.ub_list))
+        _expect(self, not self.body.block.args, "guard body takes no arguments")
+
+
 TensorDialect = Dialect("anvil.tensor", [
     FuncOp, AllocOp, ForOp, LoadOp, StoreOp, GatherOp, ConstOp, CastOp, AddOp, SubOp, MulOp, MaxOp, MinOp, DivOp,
-    SraOp, CmpOp, SelectOp, RequantOp, RsqrtIndexOp, BarrierOp,
+    SraOp, CmpOp, SelectOp, RequantOp, RsqrtIndexOp, BarrierOp, ApplyOp, GuardOp,
 ], [])
 
 BINARY = {"add": AddOp, "sub": SubOp, "mul": MulOp, "max": MaxOp, "min": MinOp, "div": DivOp, "sra": SraOp}
@@ -328,19 +362,35 @@ class TensorBuilder:
         props = {} if sym is None else {"sym": StringAttr(sym)}
         return self._v(AllocOp(properties=props, result_types=[buffer_type(shape, dtype, space)]))
 
-    def loop(self, lb, ub, step=1, bind="seq", unroll=1, tag=None):
+    def _nest(self, op, ret):
         b = self
 
         class _Ctx:
             def __enter__(self_):
-                op = b._add(ForOp(lb, ub, step, bind, unroll, tag))
-                b._blocks.append(op.body.block)
-                return op.iv
+                b._add(op)
+                b._blocks.append(op.regions[0].block)
+                return ret(op)
 
             def __exit__(self_, *exc):
                 b._blocks.pop()
 
         return _Ctx()
+
+    def loop(self, lb, ub, step=1, bind="seq", unroll=1, tag=None):
+        return self._nest(ForOp(lb, ub, step, bind, unroll, tag), lambda op: op.iv)
+
+    def guard(self, idx, m, ub):
+        """`with b.guard([i, j], lambda i, j: (i * 4 + j,), [n]):` runs the body iff every map result < its ub."""
+        idx = list(idx)
+        mm = m if isinstance(m, AffineMap) else AffineMap.from_callable(m)
+        return self._nest(GuardOp(operands=[idx], properties={"map": AffineMapAttr(mm),
+                                                              "ub": DenseArrayBase.from_list(i64, list(ub))},
+                                  regions=[Region(Block())]), lambda op: None)
+
+    def apply(self, idx, m):
+        idx = list(idx)
+        mm = m if isinstance(m, AffineMap) else AffineMap.from_callable(m)
+        return self._v(ApplyOp(operands=[idx], properties={"map": AffineMapAttr(mm)}, result_types=[i32]))
 
     @staticmethod
     def _map(m, n_idx, rank):
