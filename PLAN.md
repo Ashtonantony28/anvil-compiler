@@ -1,0 +1,105 @@
+# PLAN — Anvil, a tensor compiler for tiny-gpu-extended
+
+Design and rationale: `docs/design.md` (the approved plan, 2026-11-06). This file is the tracker: sub-goals,
+frozen contracts, Verify commands. Every sub-goal is one PR (or, until the GitHub repo exists, one commit on `main`).
+
+Approved by Ashton on 2026-11-06 with the default decisions: D1 xDSL 0.75.0, D2 new repo with the simulator as a pinned
+submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the simulator is read-only.
+
+## Status
+
+| ID | Sub-goal | Milestone | Depends on | Status |
+|---|---|---|---|---|
+| SG0 | Runtime: one `run()` over isasim, RTL and Verilator; Verilator spike | M0 | — | IN PROGRESS |
+| SG1 | IR contracts: semantics, three dialects, interpreters | M1 | — | IN PROGRESS |
+| SG2 | Backend: MIR → assembly (isel, constants, regalloc, emit) | M2 | SG1 | TODO |
+| SG3 | Tensor IR lowering and schedule primitives | M3 | SG1, SG2 | TODO |
+| SG4 | Frontend: torch.export, quantization, fusion, memory plan, launches; xf workloads from PyTorch (G1) | M4 | SG0, SG3 | TODO |
+| SG5 | Full transformer block, multi-head, d=32, 2 layers (G2) | M5 | SG4 | TODO |
+| AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
+| SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | TODO |
+| SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | TODO |
+| SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | TODO |
+| AUD-B | Final audit round, then close-out | — | SG8 | TODO |
+
+End point: audit rounds A and B only. Highs from a round become sub-goals; mediums and lows are recorded with
+strict-xfail repros. No third round.
+
+## Environment
+
+```bash
+apt-get update && apt-get install -y iverilog verilator          # iverilog 12.0, verilator 5.020
+curl -sSL -o /tmp/sv2v.zip https://github.com/zachjs/sv2v/releases/download/v0.0.13/sv2v-Linux.zip
+python3 -c "import zipfile;zipfile.ZipFile('/tmp/sv2v.zip').extractall('/tmp/sv2v')" && install /tmp/sv2v/*/sv2v /usr/local/bin/
+pip install --break-system-packages cocotb==2.0.1 numpy pytest hypothesis xdsl==0.75.0 torch
+git submodule update --init                                       # sim/ at 096c6ef
+git clone https://github.com/Ashtonantony28/nanoGPT_LLMArchitecturalExtension $NANOGPT_DIR && git -C $NANOGPT_DIR checkout 03dbab8
+```
+
+## Frozen contracts
+
+**C1 Layout.** `anvil/semantics.py` (integer semantics), `anvil/ir/{graph,tensor,mir}.py` (xDSL dialects),
+`anvil/interp/` (one interpreter per IR), `anvil/backend/`, `anvil/frontend/`, `anvil/runtime/`, `anvil/tune/`,
+`anvil/cost/`. Tests in `tests/`, marked `rtl` (runs a Verilog simulator) or `torch` (needs torch + `NANOGPT_DIR`).
+`tests/conftest.py` puts `sim/` on `sys.path`; Anvil imports `xf.*` from the pinned submodule and never copies it.
+
+**C2 Runtime.** `anvil.runtime`:
+```python
+@dataclass(frozen=True)
+class GpuParams:                       # names and defaults = sim/src/gpu.sv parameters
+    WORD_BITS: int = 32; DATA_MEM_ADDR_BITS: int = 12; DATA_MEM_DATA_BITS: int = 32
+    NUM_CORES: int = 2; THREADS_PER_BLOCK: int = 4; ICACHE_LINES: int = 0; COALESCE: int = 0
+    PIPELINED: int = 0; DCACHE_LINES: int = 0; MEDIC: int = 0; WARPS_PER_CORE: int = 1
+    WARP_POLICY: int = 0; SIMT_STACK: int = 0
+    def plusargs(self) -> list[str]     # "-Pgpu.NAME=V" for every non-default field
+
+@dataclass
+class Launch:  program: list[int]; threads: int          # 16-bit words, 1..255 threads
+@dataclass
+class Job:     data: list[int]; launches: list[Launch]; params: GpuParams = GpuParams(); mem_latency: int = 0
+
+@dataclass
+class LaunchResult: cycles: int | None; counters: dict[str, int]      # cycles None on isasim
+@dataclass
+class RunResult:
+    memory: list[int]                  # final data memory, unsigned words
+    launches: list[LaunchResult]
+    flags: dict                        # isasim only: divergent, stores_conflict, store_races, race_words
+
+def run(job: Job, backend: str = "isasim") -> RunResult   # "isasim" | "rtl" | "verilator"
+```
+Memory persists across launches, the GPU resets between them (as `sim/test/helpers/runner.py::run_launches`).
+RTL builds are cached per `GpuParams` under `.anvil-cache/`. The RTL backend reuses the simulator's own cocotb helpers.
+
+**C3 Integer semantics.** `anvil.semantics` re-exports and generalizes `xf.golden` (requant, LUT ops, rsqrt index,
+RMSNorm, softmax, saturating int8) with int32 overflow raising `OverflowError`. Every interpreter uses it; nothing
+else defines arithmetic.
+
+**C4 Verification levels.** (1) graph integer interpreter = `xf.golden` on the xf fixtures; (2) tensor interpreter after
+each schedule transform = graph interpreter; (3) MIR interpreter = tensor interpreter, before and after regalloc;
+(4) `xf.isasim` = MIR interpreter, with `divergent`, `store_races`, `stores_conflict` empty; (5) RTL = isasim through
+C2; (6) float tolerance vs PyTorch only at the graph level, with per-segment gain/RMS checks. Every new pass ships with
+a test at the level it touches; `make check` (no RTL, no torch) stays under 5 minutes.
+
+## Sub-goals
+
+### SG0 — Runtime and Verilator spike
+C2 as code. `isasim` backend wraps `xf.isasim.run` per launch on one memory. `rtl` backend: a generic cocotb test
+module that loads a Job from a JSON file named by an env var, runs every launch with the simulator's helpers and
+writes a result JSON; `run()` builds (sv2v → iverilog) once per params and invokes vvp. `verilator` backend: build the
+same sv2v output with Verilator plus a C++ or cocotb harness; adopt only if it reproduces RTL cycles exactly; record
+the speedup in `docs/decisions/ADR-001-verilator.md` either way.
+Accept: all launches of `mlp_block_0` (tiled and naive chains from `xf.mlp.launches`) and `attention_0` produce
+golden-equal memory on isasim and RTL; RTL per-launch cycles equal `sim/bench/xf-mlp.json` at the four xf-bench
+configs; isasim and RTL agree on random seeded programs from the simulator's ISA fixtures.
+Verify: `make check && python3 -m pytest -q -m rtl tests/runtime`
+
+### SG1 — IR contracts
+C3 as code. Three xDSL dialects with textual round-trip: `anvil.graph` (quantized tensor ops: qlinear/qmatmul with
+(M, s) requant, lut, rmsnorm_int, softmax_lut with causal mask, add_requant, transpose/reshape), `anvil.tensor`
+(loop nests over buffers in `global`/`smem`/`reg` with affine index expressions), `anvil.mir` (virtual-register ops 1:1
+with the 16 opcodes plus pseudo-ops for labels, loops and constants). A numpy integer interpreter for each.
+Accept: graph IR for the MLP block and the attention head, built by hand from the fixture images, interprets
+bit-exactly to `xf.golden` (`export.mlp_block_int`, `attention.attention_int`); round-trip property tests per dialect;
+tensor and MIR interpreters pass hand-written unit programs.
+Verify: `make check`
