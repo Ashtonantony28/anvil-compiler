@@ -20,7 +20,7 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | DONE |
 | SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | IN PROGRESS |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
-| SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | IN PROGRESS |
+| SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | DONE |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | TODO |
 | SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | TODO |
 | AUD-B | Final audit round, then close-out | — | SG8 | TODO |
@@ -225,6 +225,11 @@ fewer); the tuner picks a naive-style schedule for the 1×8×8 matmul on its own
 (same seed → same choice) and the whole tuned chain is re-verified on iverilog RTL; a tuning report
 `docs/g3-report.md` (per-kernel best vs default vs hand, candidates measured, wall time).
 Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" tests/tune`
+
+Done — **G3 met, stretch met.** Tuned MLP chain 24,720 cycles (0.61× hand tiled 40,329); attention 22,549 (0.57×);
+1×8×8 picks naive-style (1,148). `docs/g3-report.md`. Open (audit A): search not fully converged at budget 200;
+isasim and RTL disagree on scratch words written by masked-off lanes (results unaffected; simulator-side, uninvestigated);
+programs now hit the 256-word limit; committed best schedules are keyed by kernel IR.
 
 ### SG5b — Full model on RTL (G2)
 `anvil.compile` the SG5a model at `DATA_MEM_ADDR_BITS=16` (default and tiled presets), run on isasim, Verilator and
