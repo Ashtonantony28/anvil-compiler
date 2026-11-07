@@ -1,0 +1,1866 @@
+{
+ "entries": {
+  "0003e04386d7d753ff5c": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 1,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1194,
+   "default_cycles": 1425,
+   "invalid": 185,
+   "ir": "6e5709f1df1507f2a2f2",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 4.91,
+   "seed": 0,
+   "timed": 46,
+   "trace": "[[\"split\", [\"i\", 1], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 93
+  },
+  "019a0bc07cab2f648643": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1864,
+   "default_cycles": 4019,
+   "invalid": 215,
+   "ir": "276355824d73d3f3cec3",
+   "kernel": "o",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.11,
+   "seed": 0,
+   "timed": 70,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 4], {}]]",
+   "words": 152
+  },
+  "062fffff75fa29d32ee8": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 286,
+   "ir": "9ca0ad89eb984e8676d1",
+   "kernel": "v",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 9.84,
+   "seed": 0,
+   "timed": 71,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "0669ed0ea797ef0bb949": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 6029,
+   "default_cycles": 11831,
+   "invalid": 227,
+   "ir": "5bc2afd3e5cf2578acd8",
+   "kernel": "up",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.43,
+   "seed": 0,
+   "timed": 79,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 248
+  },
+  "084584fc038f99a1c325": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 243,
+   "ir": "f171b7391ec3a8df17e1",
+   "kernel": "q",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.52,
+   "seed": 0,
+   "timed": 55,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "12597db0b5e059d65549": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 4,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1765,
+   "default_cycles": 2751,
+   "invalid": 124,
+   "ir": "58aa14e05f14b767c26d",
+   "kernel": "scores",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.08,
+   "seed": 0,
+   "timed": 81,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 145
+  },
+  "1cb567af28bd24e10390": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2336,
+   "default_cycles": 3228,
+   "invalid": 445,
+   "ir": "558923715ca5bb712da0",
+   "kernel": "p",
+   "measured": 200,
+   "op": "softmax_lut",
+   "seconds": 15.31,
+   "seed": 0,
+   "timed": 40,
+   "trace": "[[\"compute_at\", [\"sum.i\", \"i\"], {}], [\"compute_at\", [\"max.i\", \"i\"], {}], [\"bind\", [\"i\", \"block\"], {}], [\"replicate\", [\"lane\", 4], {}], [\"cross_lane_reduce\", [\"max.j\"], {}], [\"cross_lane_reduce\", [\"sum.j\"], {}], [\"distribute\", [\"j\", \"mask\"], {}], [\"unroll\", [\"max.j.x\", 4], {}], [\"unroll\", [\"sum.j.x\", 4], {}]]",
+   "words": 98
+  },
+  "1e73a5b60d6750841215": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 5867,
+   "default_cycles": 11511,
+   "invalid": 311,
+   "ir": "5bc2afd3e5cf2578acd8",
+   "kernel": "up",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 9.21,
+   "seed": 0,
+   "timed": 80,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 247
+  },
+  "21238c5ab58aef1204fd": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 5867,
+   "default_cycles": 11511,
+   "invalid": 181,
+   "ir": "7d99fdb44615fb3169e3",
+   "kernel": "gate",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 6.12,
+   "seed": 0,
+   "timed": 85,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 247
+  },
+  "2cd4f6fc50a332208587": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 5867,
+   "default_cycles": 11511,
+   "invalid": 276,
+   "ir": "7d99fdb44615fb3169e3",
+   "kernel": "gate",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 9.22,
+   "seed": 0,
+   "timed": 70,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 247
+  },
+  "2d807e1fd0974917122a": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1829,
+   "default_cycles": 2843,
+   "invalid": 136,
+   "ir": "58aa14e05f14b767c26d",
+   "kernel": "scores",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.48,
+   "seed": 0,
+   "timed": 69,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 145
+  },
+  "35c290b632791a7188e3": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 261,
+   "ir": "4d087a8ecdb7baf95d71",
+   "kernel": "k",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.2,
+   "seed": 0,
+   "timed": 62,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "36bc4868a2e4ab651163": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 231,
+   "ir": "10515ec608f9ccad0c4a",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 7.31,
+   "seed": 0,
+   "timed": 67,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "3965c41552087cf47abd": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 6029,
+   "default_cycles": 11831,
+   "invalid": 255,
+   "ir": "7d99fdb44615fb3169e3",
+   "kernel": "gate",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.72,
+   "seed": 0,
+   "timed": 86,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 248
+  },
+  "4401a6efcb8772486a27": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 1,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1148,
+   "default_cycles": 1379,
+   "invalid": 248,
+   "ir": "6e5709f1df1507f2a2f2",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 5.29,
+   "seed": 0,
+   "timed": 52,
+   "trace": "[[\"split\", [\"i\", 1], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 93
+  },
+  "4a25540964fcf31ad1bd": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 151,
+   "ir": "4d087a8ecdb7baf95d71",
+   "kernel": "k",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 5.87,
+   "seed": 0,
+   "timed": 64,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "4b8677ac61de5d3a8103": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2336,
+   "default_cycles": 3228,
+   "invalid": 460,
+   "ir": "558923715ca5bb712da0",
+   "kernel": "p",
+   "measured": 200,
+   "op": "softmax_lut",
+   "seconds": 16.31,
+   "seed": 0,
+   "timed": 39,
+   "trace": "[[\"compute_at\", [\"sum.i\", \"i\"], {}], [\"compute_at\", [\"max.i\", \"i\"], {}], [\"bind\", [\"i\", \"block\"], {}], [\"replicate\", [\"lane\", 4], {}], [\"cross_lane_reduce\", [\"max.j\"], {}], [\"cross_lane_reduce\", [\"sum.j\"], {}], [\"distribute\", [\"j\", \"mask\"], {}], [\"unroll\", [\"max.j.x\", 4], {}], [\"unroll\", [\"sum.j.x\", 4], {}]]",
+   "words": 98
+  },
+  "4fc643d855b167ded38c": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": null
+   },
+   "cycles": 4924,
+   "default_cycles": 5341,
+   "invalid": 239,
+   "ir": "906fdda4c84fe1c3672e",
+   "kernel": "h",
+   "measured": 200,
+   "op": "rmsnorm_int",
+   "seconds": 8.05,
+   "seed": 0,
+   "timed": 72,
+   "trace": "[[\"compute_at\", [\"stat.i\", \"i\"], {}], [\"split\", [\"i\", 4, \"mask\"], {\"outer\": \"i.blk\", \"inner\": \"i.thr\"}], [\"bind\", [\"i.blk\", \"block\"], {}], [\"bind\", [\"i.thr\", \"lane\"], {}], [\"unroll\", [\"stat.j\", 4], {}], [\"unroll\", [\"j\", 4], {}]]",
+   "words": 188
+  },
+  "67ac37d0f1d030c82b53": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": null
+   },
+   "cycles": 4924,
+   "default_cycles": 5341,
+   "invalid": 302,
+   "ir": "906fdda4c84fe1c3672e",
+   "kernel": "h",
+   "measured": 200,
+   "op": "rmsnorm_int",
+   "seconds": 8.87,
+   "seed": 0,
+   "timed": 68,
+   "trace": "[[\"compute_at\", [\"stat.i\", \"i\"], {}], [\"split\", [\"i\", 4, \"mask\"], {\"outer\": \"i.blk\", \"inner\": \"i.thr\"}], [\"bind\", [\"i.blk\", \"block\"], {}], [\"bind\", [\"i.thr\", \"lane\"], {}], [\"unroll\", [\"stat.j\", 4], {}], [\"unroll\", [\"j\", 4], {}]]",
+   "words": 188
+  },
+  "68b8f537819a205d2eab": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 1,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1148,
+   "default_cycles": 1379,
+   "invalid": 178,
+   "ir": "6e5709f1df1507f2a2f2",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 4.53,
+   "seed": 0,
+   "timed": 47,
+   "trace": "[[\"split\", [\"i\", 1], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 93
+  },
+  "6c69473507df35bd2c72": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 182,
+   "ir": "f171b7391ec3a8df17e1",
+   "kernel": "q",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 6.02,
+   "seed": 0,
+   "timed": 64,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "6d89fb247db7daf1f153": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": null
+   },
+   "cycles": 4848,
+   "default_cycles": 5259,
+   "invalid": 291,
+   "ir": "906fdda4c84fe1c3672e",
+   "kernel": "h",
+   "measured": 200,
+   "op": "rmsnorm_int",
+   "seconds": 8.56,
+   "seed": 0,
+   "timed": 69,
+   "trace": "[[\"compute_at\", [\"stat.i\", \"i\"], {}], [\"split\", [\"i\", 4, \"mask\"], {\"outer\": \"i.blk\", \"inner\": \"i.thr\"}], [\"bind\", [\"i.blk\", \"block\"], {}], [\"bind\", [\"i.thr\", \"lane\"], {}], [\"unroll\", [\"stat.j\", 4], {}], [\"unroll\", [\"j\", 4], {}]]",
+   "words": 188
+  },
+  "7e6c1d8fd612935f3e2c": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1199,
+   "default_cycles": 2243,
+   "invalid": 13,
+   "ir": "e5ca2ddad9b38acecd59",
+   "kernel": "out",
+   "measured": 200,
+   "op": "add_requant",
+   "seconds": 2.43,
+   "seed": 0,
+   "timed": 96,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 96
+  },
+  "800d5cf6282829610205": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 4958,
+   "default_cycles": 9559,
+   "invalid": 283,
+   "ir": "df7e926d124c37111f43",
+   "kernel": "down",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 12.3,
+   "seed": 0,
+   "timed": 67,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 244
+  },
+  "82babd9e06d02eb69da1": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1812,
+   "default_cycles": 3907,
+   "invalid": 146,
+   "ir": "276355824d73d3f3cec3",
+   "kernel": "o",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 4.53,
+   "seed": 0,
+   "timed": 69,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 4], {}]]",
+   "words": 152
+  },
+  "8779ee15f5924c1d7e10": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 262,
+   "ir": "9ca0ad89eb984e8676d1",
+   "kernel": "v",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 7.59,
+   "seed": 0,
+   "timed": 72,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "89fed713d671147d244a": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 253,
+   "ir": "10515ec608f9ccad0c4a",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.52,
+   "seed": 0,
+   "timed": 74,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "8f45aba65fc87c071079": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1765,
+   "default_cycles": 2751,
+   "invalid": 143,
+   "ir": "58aa14e05f14b767c26d",
+   "kernel": "scores",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.58,
+   "seed": 0,
+   "timed": 73,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 145
+  },
+  "99737fe8d62f1081c67b": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 4813,
+   "default_cycles": 9247,
+   "invalid": 344,
+   "ir": "df7e926d124c37111f43",
+   "kernel": "down",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 11.81,
+   "seed": 0,
+   "timed": 64,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 243
+  },
+  "9e5ddb8af0df6e154c3a": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 257,
+   "ir": "4d087a8ecdb7baf95d71",
+   "kernel": "k",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 7.96,
+   "seed": 0,
+   "timed": 66,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "9f4e6b31353282f8200b": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 2238,
+   "default_cycles": 4819,
+   "invalid": 21,
+   "ir": "6951aa1054b4b0d20ebf",
+   "kernel": "act",
+   "measured": 200,
+   "op": "lut_mul",
+   "seconds": 2.98,
+   "seed": 0,
+   "timed": 125,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 8], {}]]",
+   "words": 179
+  },
+  "a09ae7e5fdbe4d1184c9": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1812,
+   "default_cycles": 3907,
+   "invalid": 199,
+   "ir": "276355824d73d3f3cec3",
+   "kernel": "o",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.42,
+   "seed": 0,
+   "timed": 70,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 4], {}]]",
+   "words": 152
+  },
+  "a1d255692a76df842bf9": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 263,
+   "ir": "10515ec608f9ccad0c4a",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 7.84,
+   "seed": 0,
+   "timed": 65,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "a504fa85ceba952e31c2": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 6029,
+   "default_cycles": 11831,
+   "invalid": 281,
+   "ir": "5bc2afd3e5cf2578acd8",
+   "kernel": "up",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 9.4,
+   "seed": 0,
+   "timed": 77,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 248
+  },
+  "a59be4876f0b96c616d8": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 467,
+   "default_cycles": 1023,
+   "invalid": 0,
+   "ir": "c5f9bda5c6f6941dd7d2",
+   "kernel": "kT",
+   "measured": 200,
+   "op": "transpose",
+   "seconds": 1.19,
+   "seed": 0,
+   "timed": 77,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 37
+  },
+  "a7bd21355fd15346c4f6": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1161,
+   "default_cycles": 2199,
+   "invalid": 9,
+   "ir": "e5ca2ddad9b38acecd59",
+   "kernel": "out",
+   "measured": 200,
+   "op": "add_requant",
+   "seconds": 2.23,
+   "seed": 0,
+   "timed": 102,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 96
+  },
+  "ae12d5bdb35e43eca188": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 2164,
+   "default_cycles": 4695,
+   "invalid": 18,
+   "ir": "6951aa1054b4b0d20ebf",
+   "kernel": "act",
+   "measured": 200,
+   "op": "lut_mul",
+   "seconds": 2.63,
+   "seed": 0,
+   "timed": 129,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 8], {}]]",
+   "words": 179
+  },
+  "ae7d949091d5d01e994a": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2309,
+   "default_cycles": 3174,
+   "invalid": 400,
+   "ir": "558923715ca5bb712da0",
+   "kernel": "p",
+   "measured": 200,
+   "op": "softmax_lut",
+   "seconds": 14.15,
+   "seed": 0,
+   "timed": 40,
+   "trace": "[[\"compute_at\", [\"sum.i\", \"i\"], {}], [\"compute_at\", [\"max.i\", \"i\"], {}], [\"bind\", [\"i\", \"block\"], {}], [\"replicate\", [\"lane\", 4], {}], [\"cross_lane_reduce\", [\"max.j\"], {}], [\"cross_lane_reduce\", [\"sum.j\"], {}], [\"distribute\", [\"j\", \"mask\"], {}], [\"unroll\", [\"max.j.x\", 4], {}], [\"unroll\", [\"sum.j.x\", 4], {}]]",
+   "words": 98
+  },
+  "b53a215a2ee347912a26": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 285,
+   "ir": "10515ec608f9ccad0c4a",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 9.25,
+   "seed": 0,
+   "timed": 64,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "b6342dfcbcfb1cc8fca8": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2783,
+   "default_cycles": 5715,
+   "invalid": 214,
+   "ir": "9ca0ad89eb984e8676d1",
+   "kernel": "v",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.03,
+   "seed": 0,
+   "timed": 67,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "b73441c09b256dda916e": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 274,
+   "ir": "f171b7391ec3a8df17e1",
+   "kernel": "q",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.32,
+   "seed": 0,
+   "timed": 63,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "befef6579a79f89f7ea9": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 487,
+   "default_cycles": 1035,
+   "invalid": 0,
+   "ir": "c5f9bda5c6f6941dd7d2",
+   "kernel": "kT",
+   "measured": 200,
+   "op": "transpose",
+   "seconds": 1.22,
+   "seed": 0,
+   "timed": 76,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 37
+  },
+  "c0c8dbaa4ece10c18405": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1864,
+   "default_cycles": 4019,
+   "invalid": 209,
+   "ir": "276355824d73d3f3cec3",
+   "kernel": "o",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.07,
+   "seed": 0,
+   "timed": 66,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 4], {}]]",
+   "words": 152
+  },
+  "c2b356142e8ee852f0e3": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 6029,
+   "default_cycles": 11831,
+   "invalid": 266,
+   "ir": "7d99fdb44615fb3169e3",
+   "kernel": "gate",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.28,
+   "seed": 0,
+   "timed": 81,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 248
+  },
+  "c7b3b67d68f5f0b320e2": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 2238,
+   "default_cycles": 4819,
+   "invalid": 21,
+   "ir": "6951aa1054b4b0d20ebf",
+   "kernel": "act",
+   "measured": 200,
+   "op": "lut_mul",
+   "seconds": 2.91,
+   "seed": 0,
+   "timed": 117,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 8], {}]]",
+   "words": 179
+  },
+  "c866fc222e8a57af772b": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1829,
+   "default_cycles": 2843,
+   "invalid": 137,
+   "ir": "58aa14e05f14b767c26d",
+   "kernel": "scores",
+   "measured": 200,
+   "op": "qmatmul",
+   "seconds": 5.43,
+   "seed": 0,
+   "timed": 71,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 145
+  },
+  "c8c8f427b9e1263f8846": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 304,
+   "ir": "4d087a8ecdb7baf95d71",
+   "kernel": "k",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.89,
+   "seed": 0,
+   "timed": 55,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "cc26f653ccbf20fe566d": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 4813,
+   "default_cycles": 9247,
+   "invalid": 346,
+   "ir": "df7e926d124c37111f43",
+   "kernel": "down",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 11.13,
+   "seed": 0,
+   "timed": 71,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 243
+  },
+  "d4e1d13cd49f550f3e80": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1199,
+   "default_cycles": 2243,
+   "invalid": 23,
+   "ir": "e5ca2ddad9b38acecd59",
+   "kernel": "out",
+   "measured": 200,
+   "op": "add_requant",
+   "seconds": 2.68,
+   "seed": 0,
+   "timed": 94,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 96
+  },
+  "d552b0633002d7c029d8": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2309,
+   "default_cycles": 3174,
+   "invalid": 470,
+   "ir": "558923715ca5bb712da0",
+   "kernel": "p",
+   "measured": 200,
+   "op": "softmax_lut",
+   "seconds": 16.56,
+   "seed": 0,
+   "timed": 41,
+   "trace": "[[\"compute_at\", [\"sum.i\", \"i\"], {}], [\"compute_at\", [\"max.i\", \"i\"], {}], [\"bind\", [\"i\", \"block\"], {}], [\"replicate\", [\"lane\", 4], {}], [\"cross_lane_reduce\", [\"max.j\"], {}], [\"cross_lane_reduce\", [\"sum.j\"], {}], [\"distribute\", [\"j\", \"mask\"], {}], [\"unroll\", [\"max.j.x\", 4], {}], [\"unroll\", [\"sum.j.x\", 4], {}]]",
+   "words": 98
+  },
+  "d57532cbee52497f8591": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 4,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2999,
+   "default_cycles": 5715,
+   "invalid": 259,
+   "ir": "f171b7391ec3a8df17e1",
+   "kernel": "q",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 6.49,
+   "seed": 0,
+   "timed": 63,
+   "trace": "[[\"split\", [\"i\", 4], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 249
+  },
+  "d5a090b58d8e59ee30dd": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 487,
+   "default_cycles": 1035,
+   "invalid": 0,
+   "ir": "c5f9bda5c6f6941dd7d2",
+   "kernel": "kT",
+   "measured": 200,
+   "op": "transpose",
+   "seconds": 1.24,
+   "seed": 0,
+   "timed": 73,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 37
+  },
+  "d5f3830f3e0ba5559b04": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 4958,
+   "default_cycles": 9559,
+   "invalid": 350,
+   "ir": "df7e926d124c37111f43",
+   "kernel": "down",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 11.32,
+   "seed": 0,
+   "timed": 68,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 244
+  },
+  "d834b58878cdace21185": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1161,
+   "default_cycles": 2199,
+   "invalid": 14,
+   "ir": "e5ca2ddad9b38acecd59",
+   "kernel": "out",
+   "measured": 200,
+   "op": "add_requant",
+   "seconds": 2.49,
+   "seed": 0,
+   "timed": 105,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 96
+  },
+  "d93f1adb609e509e0e51": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 1,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 1194,
+   "default_cycles": 1425,
+   "invalid": 171,
+   "ir": "6e5709f1df1507f2a2f2",
+   "kernel": "y",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 4.49,
+   "seed": 0,
+   "timed": 47,
+   "trace": "[[\"split\", [\"i\", 1], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 1], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 93
+  },
+  "df7679b82d00184ed653": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "compile_kw": {
+    "const_args": null
+   },
+   "cycles": 4848,
+   "default_cycles": 5259,
+   "invalid": 242,
+   "ir": "906fdda4c84fe1c3672e",
+   "kernel": "h",
+   "measured": 200,
+   "op": "rmsnorm_int",
+   "seconds": 8.16,
+   "seed": 0,
+   "timed": 69,
+   "trace": "[[\"compute_at\", [\"stat.i\", \"i\"], {}], [\"split\", [\"i\", 4, \"mask\"], {\"outer\": \"i.blk\", \"inner\": \"i.thr\"}], [\"bind\", [\"i.blk\", \"block\"], {}], [\"bind\", [\"i.thr\", \"lane\"], {}], [\"unroll\", [\"stat.j\", 4], {}], [\"unroll\", [\"j\", 4], {}]]",
+   "words": 188
+  },
+  "dff83c96bf7719d9624c": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 2867,
+   "default_cycles": 5899,
+   "invalid": 240,
+   "ir": "9ca0ad89eb984e8676d1",
+   "kernel": "v",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.99,
+   "seed": 0,
+   "timed": 71,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 233
+  },
+  "e15e71d7bbf994ca831c": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 4
+   },
+   "cycles": 2164,
+   "default_cycles": 4695,
+   "invalid": 15,
+   "ir": "6951aa1054b4b0d20ebf",
+   "kernel": "act",
+   "measured": 200,
+   "op": "lut_mul",
+   "seconds": 2.72,
+   "seed": 0,
+   "timed": 131,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 8], {}]]",
+   "words": 179
+  },
+  "e41188265439d0352492": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 467,
+   "default_cycles": 1023,
+   "invalid": 0,
+   "ir": "c5f9bda5c6f6941dd7d2",
+   "kernel": "kT",
+   "measured": 200,
+   "op": "transpose",
+   "seconds": 1.31,
+   "seed": 0,
+   "timed": 80,
+   "trace": "[[\"fuse\", [\"d0\", \"d1\"], {\"name\": \"d0_d1\"}], [\"split\", [\"d0_d1\", 8, \"mask\"], {\"outer\": \"d0_d1.seq\", \"inner\": \"d0_d1.par\"}], [\"reorder\", [\"d0_d1.par\", \"d0_d1.seq\"], {}], [\"split\", [\"d0_d1.par\", 4, \"mask\"], {\"outer\": \"d0_d1.par.blk\", \"inner\": \"d0_d1.par.thr\"}], [\"bind\", [\"d0_d1.par.blk\", \"block\"], {}], [\"bind\", [\"d0_d1.par.thr\", \"lane\"], {}], [\"unroll\", [\"d0_d1.seq\", 4], {}]]",
+   "words": 37
+  },
+  "f831d884a37ea3992575": {
+   "budget": 200,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "compile_kw": {
+    "const_args": 2
+   },
+   "cycles": 5867,
+   "default_cycles": 11511,
+   "invalid": 257,
+   "ir": "5bc2afd3e5cf2578acd8",
+   "kernel": "up",
+   "measured": 200,
+   "op": "qlinear",
+   "seconds": 8.63,
+   "seed": 0,
+   "timed": 80,
+   "trace": "[[\"split\", [\"i\", 2], {\"outer\": \"io\", \"inner\": \"ii\"}], [\"split\", [\"j\", 2], {\"outer\": \"jo\", \"inner\": \"ji\"}], [\"reorder\", [\"io\", \"jo\", \"ii\", \"ji\"], {}], [\"fuse\", [\"ii\", \"ji\"], {\"name\": \"r\"}], [\"interchange\", [\"r\", \"k\"], {}], [\"fuse\", [\"io\", \"jo\"], {\"name\": \"io_jo\"}], [\"split\", [\"io_jo\", 4, \"mask\"], {\"outer\": \"io_jo.blk\", \"inner\": \"io_jo.thr\"}], [\"bind\", [\"io_jo.blk\", \"block\"], {}], [\"bind\", [\"io_jo.thr\", \"lane\"], {}], [\"unroll\", [\"k\", 8], {}]]",
+   "words": 247
+  }
+ },
+ "note": "anvil.tune.g3_report seed=0 budget=200: best schedules of the xf-bench workloads (mlp_block_0, attention_0, 1x8x8) at the four xf-bench configs",
+ "version": 1
+}

@@ -20,6 +20,11 @@ Schedule selection (`schedules`):
                           (Schedule.to_json); unlisted kernels take the default. Explicit entries never fall back:
                           an illegal one raises ScheduleError
     callable(kernel, target) -> Schedule | None (None: default)
+    "tuned"               the best schedule anvil.tune found per kernel (SG6): replayed from the best-schedule
+                          store (committed anvil/tune/best/*.json, then .anvil-cache/tune/best.json), searched on a
+                          miss. `tune=` takes TunedPolicy keywords: budget, seed, workers, search (False: replay or
+                          default, never search), ranker, db, cache, inputs. A TunedPolicy instance works too.
+                          Tuned kernels compile with their own codegen options; `cm.tuning` reports per kernel
 
 Runs: `keep="outputs"` (the default plan) reuses dead activation buffers, so only the graph outputs (and inputs
 not overwritten) can be read back; `run(..., keep="all")` uses a second plan of the same compiled programs in which
@@ -130,16 +135,28 @@ class CompiledModel:
     """A compiled launch chain: lowered Program, per-kernel schedules and programs, memory plan."""
 
     def __init__(self, module, consts, params: GpuParams, schedules=None, *, quantized=None, target_kw=None,
-                 compile_kw=None):
+                 compile_kw=None, tune=None):
         self.module, self.consts, self.params, self.quantized = module, consts, params, quantized
         self.program = lower(module)
         self.meta = _graph_meta(module)
         self.target = Target.from_params(params, **{"max_threads": MAX_THREADS, **(target_kw or {})})
-        self.schedules, self.kernels = {}, {}
+        self.schedules, self.kernels, self.tuning = {}, {}, {}
+        policy = None
+        if schedules == "tuned" or type(schedules).__name__ == "TunedPolicy":
+            from .tune.policy import TunedPolicy
+            policy = schedules if isinstance(schedules, TunedPolicy) else TunedPolicy(params, **(tune or {}))
+            policy.prepare(self.program, {**self.program.const_values, **consts}, params, self.target)
         for k in self.program.kernels:
-            s, how = select_schedule(k, self.target, schedules)
+            ckw = dict(compile_kw or {})
+            if policy is not None:
+                s, tkw, how = policy.select(k, self.target)
+                ckw.update(tkw)
+            else:
+                s, how = select_schedule(k, self.target, schedules)
             self.schedules[k.name] = (how, s.to_json())
-            self.kernels[k.name] = compile_kernel(s.finalize(), params, **(compile_kw or {}))
+            self.kernels[k.name] = compile_kernel(s.finalize(), params, **ckw)
+        if policy is not None:
+            self.tuning = policy.results
         self._plans = {}
         self.plan = self.memory_plan("outputs")
 
@@ -242,8 +259,8 @@ class CompiledModel:
 
 
 def compile(model, example_inputs=None, calib_inputs=None, params: GpuParams | None = None, schedules=None, *,
-            consts=None, target_kw=None, compile_kw=None, **quant_kw) -> CompiledModel:
+            consts=None, target_kw=None, compile_kw=None, tune=None, **quant_kw) -> CompiledModel:
     """anvil.compile: see the module docstring."""
     module, cs, q = _resolve_model(model, example_inputs, calib_inputs, consts, quant_kw)
     return CompiledModel(module, cs, params or GpuParams(), schedules, quantized=q, target_kw=target_kw,
-                         compile_kw=compile_kw)
+                         compile_kw=compile_kw, tune=tune)
