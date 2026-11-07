@@ -1,6 +1,7 @@
-# Anvil: a tensor compiler for tiny-gpu-extended (plan for review)
+# Anvil: a tensor compiler for tiny-gpu-extended (design)
 
-**Status:** plan only, waiting on Ashton's review. No implementation code has been written.
+**Status:** approved 2026-11-06 and built; this is the original design. Results and the audited claims are in
+`docs/closeout.md` and PLAN.md.
 **Written:** 2026-11-06, from `project-analysis/tiny-gpu-extended.md` and the simulator repo as it stands at the close-out
 (`Ashtonantony28/Didactic_GPU_Simulator`, branch `claude/complete-markdown-tasks-IG7yf`, commit `096c6ef`, AUDIT-21).
 **Working name:** Anvil (rename freely).

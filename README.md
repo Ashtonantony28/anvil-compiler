@@ -42,5 +42,5 @@ python3 -m pytest -q -m rtl tests/codegen tests/tune tests/cost tests/audit
 NANOGPT_DIR=... python3 -m pytest -q -m "(rtl or torch) and not slow" tests/driver tests/tune
 ```
 
-Reports: `docs/codegen-bench.md`, `docs/g1-report.md` .. `docs/g4-report.md`, each with the command that
+Reports: `docs/codegen-bench.md`, `docs/g1-report.md` .. `docs/g5-report.md`, the close-out summary `docs/closeout.md`, each with the command that
 regenerates it.
