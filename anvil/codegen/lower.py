@@ -26,8 +26,10 @@ Machine mapping
                write nothing; nesting is limited so that at most 8 SIMT-stack entries are ever pushed (2 per level);
     mask       lane-varying otherwise: the body runs for every lane; global stores go to a per-thread sink word
                (args[sink] + global thread id) and smem stores to a spare smem word when the predicate is 0, and
-               reg stores keep the old value (select). Loads, gathers and arithmetic need no masking (no faults;
-               addresses wrap to the memory size).
+               reg stores keep the old value (select). Loads and gathers of a lane whose predicate is 0 read a
+               safe word instead (word 0 of the same buffer, or the args block for a buffer the kernel writes), and
+               inactive lanes (l >= Lx) compute with l clamped to Lx - 1, so a masked-off lane never reads a word
+               outside the buffers an active lane reads (canonical rule 2; no cross-core read/write races, A1-M1).
 * Ops. requant / min / cmp / select via anvil.backend.idioms; requant with a register shift (rmsnorm's s + k)
   computes its rounding term 2^(S-1) branch-free (0 - SRA(INT_MIN, 31-S)) div 2; rsqrt_index is a counted,
   branch-free loop (K iterations, enough for any non-negative int32); gather is LDR(base + offset + v).
@@ -115,6 +117,10 @@ class _Gen(idioms.Builder):
     def __init__(self, kernel, params, predication, const_args=None):
         super().__init__()
         self.const_args = const_args
+        if params.WORD_BITS != 32 or params.DATA_MEM_DATA_BITS != 32:
+            raise CodegenError(f"anvil generates code for 32-bit words only (constants, requant rounding and the "
+                               f"int32 sign idioms assume them); got WORD_BITS={params.WORD_BITS}, "
+                               f"DATA_MEM_DATA_BITS={params.DATA_MEM_DATA_BITS}")
         if predication not in PREDICATION:
             raise CodegenError(f"predication {predication!r} not in {PREDICATION}")
         if predication == "sync" and not params.SIMT_STACK:
@@ -138,6 +144,8 @@ class _Gen(idioms.Builder):
         self.smem_used = 0
         self.smem_sink = None
         self.sink_used = False
+        self.pred_depth: dict = {}       # load predicate register -> scope depth where it is defined
+        self.written: set = set()        # buffers (SSA values) the kernel stores to
 
     # ------------------------------------------------------------------------------------- emission
     def emit(self, op):
@@ -405,6 +413,7 @@ class _Gen(idioms.Builder):
                 top.pmem = self.and_pred(top.pmem, p)
                 if not lane_activity:
                     top.preg = self.and_pred(top.preg, p)
+                    self.pred_depth[top.preg] = len(self.stack) - 1
                 self.push("plain")
                 body()
                 self.pop()
@@ -469,9 +478,42 @@ class _Gen(idioms.Builder):
     def masked_addr(self, addr: str, sink: str, p: str) -> str:
         return self.select(p, addr, sink)
 
-    def load_mem(self, space, addr) -> str:
+    def masked_load_addr(self, space, addr, buf) -> str:
+        """Under a lane-varying mask guard (not the lane-activity guard: inactive lanes compute with a clamped
+        lane index) a lane whose predicate is 0 must not load its out-of-range address (A1-M1, canonical rule 2):
+        it loads `safe` instead, word 0 of the same buffer - a word an active lane may read in this phase, so no
+        other thread writes it now - or the args block for a global buffer the kernel also writes (never written
+        during a launch). addr' = p*addr + (1-p)*safe, with (1-p)*safe hoisted to the predicate's scope."""
+        p = self.stack[-1].preg
+        if p is None:
+            return addr
+        key = ("maddr", p, addr)
+        hit = self.cached(key)
+        if hit is not None:
+            return hit
+        qkey = ("mq", p, space, buf)
+        q = self.cached(qkey)
+        if q is None:
+            d = self.pred_depth.get(p, len(self.stack) - 1)
+            with self.at(d):
+                if space == "smem":
+                    zero = [Lin()] * len(_shape(buf))
+                    safe = self.lin_reg(self.smem_lin(buf, zero))
+                elif buf is None or buf in self.written:
+                    safe = "R12"
+                else:
+                    safe = self.atom_reg(self.base_atom(buf))
+                q = self.mul(self.sub(1, p), safe)
+            self.stack[d].cache[qkey] = q
+        hit = self.add(self.mul(p, addr), q)
+        self.stack[-1].cache[key] = hit
+        self.stats["mask_loads"] = self.stats.get("mask_loads", 0) + 1
+        return hit
+
+    def load_mem(self, space, addr, buf=None) -> str:
         """LDR/LDS with CSE: a word this thread already loaded since the last store to that space or barrier,
         within the current loop iteration, is reused (canonical kernels are race-free between barriers)."""
+        addr = self.masked_load_addr(space, addr, buf)
         key = ("ld", space, addr)
         for s in reversed(self.stack):
             if key in s.cache:
@@ -531,6 +573,7 @@ class _Gen(idioms.Builder):
             self.slots.append(("block_offset", None))
         self.order = {op: i for i, op in enumerate(f.walk())}
         self.reg_stores = {}
+        self.written = {op.buf for op in f.walk() if isinstance(op, t.StoreOp)}
         for op in f.walk():
             if isinstance(op, t.StoreOp) and t.space_of(op.buf.type) == "reg":
                 self.reg_stores.setdefault(op.buf, []).append(self.order[op])
@@ -559,6 +602,12 @@ class _Gen(idioms.Builder):
         self.vals[Lw.iv] = self.warp_iv
         if Lx == 1:
             lane_iv = Lin()
+        elif Lx < self.lpw and not self.simt:
+            # mask predication runs the body on inactive lanes l >= Lx too: they compute with l clamped to Lx - 1,
+            # so every address they load is one an active lane loads (no out-of-bounds or racing reads, A1-M1);
+            # their stores go to the sink (the lane-activity predicate still uses the raw lane)
+            lane_iv = Lin.of(Atom("lane_iv", 0, Lx - 1, 0, varying=True,
+                                  make=lambda g: g.min(g.atom_reg(raw_lane), Lx - 1)))
         else:
             lane_iv = Lin.of(Atom("lane_iv", 0, Lx - 1, 0, varying=True, make=lambda g: g.atom_reg(raw_lane)))
         self.vals[Ll.iv] = lane_iv
@@ -680,7 +729,7 @@ class _Gen(idioms.Builder):
                 V[op.result] = e
             else:
                 a = self.global_addr(op.buf, idx) if sp == "global" else self.lin_reg(self.smem_lin(op.buf, idx))
-                V[op.result] = self.load_mem(sp, a)
+                V[op.result] = self.load_mem(sp, a, op.buf)
         elif isinstance(op, t.StoreOp):
             sp = t.space_of(op.buf.type)
             idx = self.index(op)
@@ -700,10 +749,10 @@ class _Gen(idioms.Builder):
             sp = t.space_of(op.buf.type)
             if sp == "global":
                 a = self.add(self.lin_reg(Lin.of(self.base_atom(op.buf)) + off), self.r(op.idx))
-                V[op.result] = self.load_mem("global", a)
+                V[op.result] = self.load_mem("global", a, op.buf)
             elif sp == "smem":
                 a = self.add(self.lin_reg(self.smem_lin(op.buf, [Lin.of(off)])), self.r(op.idx))
-                V[op.result] = self.load_mem("smem", a)
+                V[op.result] = self.load_mem("smem", a, op.buf)
             else:
                 raise CodegenError("gather from a register buffer")
         elif isinstance(op, t.ConstOp):

@@ -61,6 +61,14 @@ class RunOutput:
     cycles: dict                        # kernel name -> cycles summed over its launches (None on isasim)
     result: object                      # anvil.runtime.RunResult
     job: object                         # anvil.codegen.JobPlan
+    _consts: frozenset = frozenset()    # const syms (must be unchanged by the run)
+
+    def stray_writes(self, *, scratch_ok: bool = True) -> list:
+        """Words the run changed that it must not have: outside every planned buffer (args blocks, gaps, past the
+        job) or inside a const (weights, LUTs). Empty for a correct chain (AUDIT-A1 M3); scratch_ok exempts the
+        shared sink/spill words."""
+        consts = [s for s in self.job.buffers if s in self._consts]
+        return self.job.stray_writes(self.result.memory, unchanged=consts, scratch_ok=scratch_ok)
 
     @property
     def total_cycles(self):
@@ -69,13 +77,13 @@ class RunOutput:
 
 
 def _graph_meta(module):
-    """sym -> (scale, shape) for every graph value."""
+    """sym -> (scale, shape, dtype) for every graph value."""
     out = {}
     for op in g.funcs(module)[0].body.block.ops:
         if isinstance(op, g.OutputOp) or not op.results:
             continue
         ty = g.qt(op.results[0])
-        out[op.sym_str] = (ty.qscale, tuple(ty.dims))
+        out[op.sym_str] = (ty.qscale, tuple(ty.dims), ty.dtype)
     return out
 
 
@@ -83,12 +91,17 @@ def _resolve_model(model, example_inputs, calib_inputs, consts, quant_kw):
     from xdsl.dialects.builtin import ModuleOp
 
     from .frontend import Quantized
+    graph_path = isinstance(model, (Quantized, ModuleOp)) or (
+        isinstance(model, tuple) and len(model) == 2 and isinstance(model[0], ModuleOp))
+    if graph_path and quant_kw:
+        raise TypeError(f"anvil.compile got unexpected keyword argument(s) {sorted(quant_kw)} (extra keywords go to "
+                        "quantize, which only runs for a torch module)")
     if isinstance(model, Quantized):
         return model.module, dict(model.consts), model
     if isinstance(model, tuple) and len(model) == 2 and isinstance(model[0], ModuleOp):
-        return model[0], dict(model[1]), None
+        return _checked_graph(model[0], dict(model[1]))
     if isinstance(model, ModuleOp):
-        return model, dict(consts or {}), None
+        return _checked_graph(model, dict(consts or {}))
     try:
         import torch
     except ImportError:
@@ -103,6 +116,22 @@ def _resolve_model(model, example_inputs, calib_inputs, consts, quant_kw):
                     "an anvil.graph module or (module, consts)")
 
 
+def _checked_graph(module, consts):
+    """A graph-IR model as given (not from quantize): every non-inline const needs its values, and the int32
+    overflow proof that quantize runs must hold here too (AUDIT-A2 M4, M6)."""
+    from .frontend.quantize import prove_no_overflow
+    need = [op.sym_str for op in g.funcs(module)[0].body.block.ops
+            if isinstance(op, g.ConstOp) and op.value is None]
+    missing = [s for s in need if s not in consts]
+    if missing:
+        raise ValueError(f"no values for graph consts {missing}: pass consts= or a (module, consts) pair")
+    unknown = sorted(set(consts) - set(need))
+    if unknown:
+        raise ValueError(f"consts {unknown} name no graph const of the module")
+    prove_no_overflow(module, consts)
+    return module, consts, None
+
+
 def select_schedule(kernel, target: Target, schedules=None) -> tuple[Schedule, str]:
     """(Schedule, description) for one lowered kernel under the `schedules` policy (module docstring)."""
     if schedules is None:
@@ -110,6 +139,8 @@ def select_schedule(kernel, target: Target, schedules=None) -> tuple[Schedule, s
     if callable(schedules) and not isinstance(schedules, (str, dict)):
         s = schedules(kernel, target)
         return (s, "custom") if s is not None else (T.default_schedule(kernel, target), "default")
+    if not isinstance(schedules, (str, dict)):
+        raise TypeError(f"schedules must be a preset name, a dict, a callable or 'tuned', not {schedules!r}")
     strict = not isinstance(schedules, str)
     if isinstance(schedules, str) and schedules not in PRESETS:
         raise KeyError(f"unknown schedule preset {schedules!r}: {sorted(PRESETS)}")
@@ -120,6 +151,9 @@ def select_schedule(kernel, target: Target, schedules=None) -> tuple[Schedule, s
     try:
         if isinstance(spec, str) and spec in T.TEMPLATES:
             return T.TEMPLATES[spec](Schedule(kernel, target)), spec
+        if isinstance(spec, str) and not spec.lstrip().startswith("["):
+            raise ScheduleError(f"{kernel.name}: {spec!r} is neither a template ({sorted(T.TEMPLATES)}) nor a "
+                                "JSON schedule trace")
         if isinstance(spec, (str, list)):
             return Schedule.replay(kernel, spec, target), "trace"
         if callable(spec):
@@ -136,8 +170,16 @@ class CompiledModel:
 
     def __init__(self, module, consts, params: GpuParams, schedules=None, *, quantized=None, target_kw=None,
                  compile_kw=None, tune=None):
+        if isinstance(params, dict):
+            params = GpuParams(**params)
+        if not isinstance(params, GpuParams):
+            raise TypeError(f"params must be a GpuParams (or a dict of its fields), not {type(params).__name__}")
         self.module, self.consts, self.params, self.quantized = module, consts, params, quantized
         self.program = lower(module)
+        if not self.program.kernels:
+            raise ValueError("the graph has no operations to compile (its outputs are its inputs)")
+        self.in_dtypes = {op.sym_str: g.qt(op.results[0]).dtype for op in g.funcs(module)[0].body.block.ops
+                          if isinstance(op, g.InputOp)}
         self.meta = _graph_meta(module)
         self.target = Target.from_params(params, **{"max_threads": MAX_THREADS, **(target_kw or {})})
         self.schedules, self.kernels, self.tuning = {}, {}, {}
@@ -155,6 +197,12 @@ class CompiledModel:
                 s, how = select_schedule(k, self.target, schedules)
             self.schedules[k.name] = (how, s.to_json())
             self.kernels[k.name] = compile_kernel(s.finalize(), params, **ckw)
+        if isinstance(schedules, dict):
+            names = {k.name for k in self.program.kernels} | {k.op for k in self.program.kernels}
+            unknown = sorted(set(schedules) - names)
+            if unknown:
+                raise KeyError(f"schedules name no kernel or op kind of the graph: {unknown} (kernels "
+                               f"{[k.name for k in self.program.kernels]})")
         if policy is not None:
             self.tuning = policy.results
         self._plans = {}
@@ -183,13 +231,14 @@ class CompiledModel:
         return self.meta[sym][0]
 
     def quantize_input(self, x, sym=None):
-        """Float array -> int8 by the input's scale (symmetric, round half to even, saturating)."""
+        """Float array -> integers by the input's scale (symmetric, round half to even, saturating at the input's
+        dtype: int8, or int16 for a wide residual input, ADR-004)."""
         from . import semantics as sem
         sym = sym or self.inputs[0]
         s = self.scale(sym)
         if s is None:
             raise ValueError(f"input {sym!r} has no scale: pass integer inputs with quantized=True")
-        return sem.clamp_i8(np.rint(np.asarray(x, dtype=np.float64) / s)).astype(np.int64)
+        return sem.clamp_dtype(np.rint(np.asarray(x, dtype=np.float64) / s), self.meta[sym][2]).astype(np.int64)
 
     def dequantize(self, sym, ints):
         s = self.scale(sym)
@@ -203,13 +252,32 @@ class CompiledModel:
         out = {}
         for sym, v in zip(self.inputs, xs):
             v = np.asarray(v)
-            shape = self.meta[sym][1]
+            shape = tuple(self.meta[sym][1])
             if v.shape != shape:
-                if v.size != math.prod(shape):
+                squeeze = lambda sh: tuple(d for d in sh if d != 1)   # noqa: E731
+                if v.size != math.prod(shape) or (v.ndim > 1 and squeeze(v.shape) != squeeze(shape)):
+                    # only a flat array or extra size-1 dims are reshaped; a transposed input is an error (A2-L8)
                     raise ValueError(f"input {sym!r}: shape {v.shape} != {shape}")
                 v = v.reshape(shape)
-            out[sym] = np.asarray(v, dtype=np.int64) if quantized else self.quantize_input(v, sym)
+            if quantized:
+                out[sym] = self._check_int_input(sym, v)
+            else:
+                if not np.all(np.isfinite(np.asarray(v, dtype=np.float64))):
+                    raise ValueError(f"input {sym!r} has NaN or infinite values")
+                out[sym] = self.quantize_input(v, sym)
         return out
+
+    def _check_int_input(self, sym, v):
+        """quantized=True: integer values inside the input's own dtype (every overflow bound assumes it, A2-M5)."""
+        if v.dtype.kind not in "iub":
+            raise ValueError(f"input {sym!r}: quantized=True needs integer values, got dtype {v.dtype}")
+        dt = self.in_dtypes.get(sym, "i8")
+        bits = {"i8": 8, "i16": 16, "i32": 32}.get(dt, 32)
+        lo, hi = -(1 << (bits - 1)), (1 << (bits - 1)) - 1
+        v = np.asarray(v, dtype=np.int64)
+        if v.size and (v.min() < lo or v.max() > hi):
+            raise ValueError(f"input {sym!r}: values in [{v.min()}, {v.max()}] outside {dt} [{lo}, {hi}]")
+        return v
 
     def job(self, x, *, quantized=False, keep="outputs"):
         """The JobPlan for one input (anvil.codegen.program_job at this model's memory plan)."""
@@ -250,7 +318,8 @@ class CompiledModel:
             li += ck.launches
             cycles[k.name] = None if any(r.cycles is None for r in lrs) else sum(r.cycles for r in lrs)
         outs = [self.dequantize(s, ints[s]) for s in self.outputs]
-        return RunOutput(outs[0], outs, ints, cycles, res, jp)
+        consts = frozenset(set(self.program.const_values) | set(self.consts))
+        return RunOutput(outs[0], outs, ints, cycles, res, jp, consts)
 
     def summary(self) -> str:
         rows = [f"{k.name:>10} {k.op:<12} {self.schedules[k.name][0]:<14} {self.kernels[k.name].program.stats['words']:>4} words "

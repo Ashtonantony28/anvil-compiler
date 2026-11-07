@@ -52,6 +52,7 @@ def test_fixture_cases_golden_on_isasim(block, preset):
             assert np.array_equal(full.ints[seg], want), (i, seg)
         reuse = cm.run(d["inputs"]["x"], quantized=True)
         assert flags_clean(reuse.result)
+        assert not full.stray_writes() and not reuse.stray_writes()
         assert np.array_equal(reuse.ints[OUT[block]], d["golden"][OUT[block]])
         assert np.allclose(reuse.output, d["golden"][OUT[block]] * cm.scale(OUT[block]))
 
@@ -149,8 +150,24 @@ def test_other_configurations(cfg):
         r = cm.run(d["inputs"]["x"], quantized=True)
         assert np.array_equal(r.ints[OUT[block]], d["golden"][OUT[block]])
         assert not any(r.result.flags[k] for k in ("store_races", "stores_conflict"))
+        assert not r.stray_writes()
 
 
 def test_compile_rejects_unknown_models():
     with pytest.raises(TypeError, match="cannot compile"):
         driver.compile(42)
+
+
+def test_stray_writes_catch_a_write_outside_the_plan_and_into_consts():
+    """RunOutput.stray_writes (A1-M3): a word changed past the job, in an args block or in a const is reported."""
+    cm = compiled("mlp_block", "default")
+    d = _fx("mlp_block", 0)
+    r = cm.run(d["inputs"]["x"], quantized=True)
+    assert r.stray_writes() == []
+    end = r.job.end
+    w = r.job.addresses[next(s for s in cm.consts)]
+    a = r.job.args[0][2]
+    for addr in (end, a, w):
+        r.result.memory[addr] ^= 0x55
+        assert addr in r.stray_writes()
+        r.result.memory[addr] ^= 0x55

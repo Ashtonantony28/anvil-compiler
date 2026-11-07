@@ -147,6 +147,25 @@ class JobPlan:
     scratch: int = 0
     end: int = 0                                        # first free word
 
+    def stray_writes(self, memory, *, unchanged=(), scratch_ok: bool = True) -> list[int]:
+        """Addresses whose final word differs from the job's initial memory although they belong to no buffer of
+        the plan: args blocks, gaps and every word past the job (AUDIT-A1 M3: a check of the named buffers alone
+        cannot see a store outside them), plus the words of the buffers named in `unchanged` (e.g. consts). The
+        shared sink/spill words [scratch, end) are exempt with scratch_ok."""
+        mask = (1 << self.job.params.WORD_BITS) - 1
+        inside = np.zeros(len(memory), dtype=bool)
+        keep = set(unchanged)
+        for sym, (shape, _) in self.buffers.items():
+            if sym in self.addresses and sym not in keep:
+                a = self.addresses[sym]
+                inside[a:a + math.prod(shape)] = True
+        if scratch_ok:
+            inside[self.scratch:self.end] = True
+        init = np.zeros(len(memory), dtype=np.int64)
+        init[:len(self.job.data)] = np.asarray(self.job.data, dtype=np.int64) & mask
+        got = np.asarray(memory, dtype=np.int64) & mask
+        return [int(a) for a in np.flatnonzero((got != init) & ~inside)]
+
     def read(self, memory, sym) -> np.ndarray:
         shape, _ = self.buffers[sym]
         a, n = self.addresses[sym], math.prod(shape)

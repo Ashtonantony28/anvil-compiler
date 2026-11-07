@@ -16,7 +16,10 @@ closed form, with the breakdown) and the Verilator counters.
 
 Split (frozen in SPLIT, written to split.json): held-out kernels (the whole xf attention head, five model kernels,
 six synthetic ones) and held-out configurations (four; two use values never seen in training: DCACHE_LINES=8, and
-GTLRR with both caches). Training uses only train kernels x train configs.
+GTLRR with both caches). Training uses only train kernels x train configs. Deduplicated after the build
+(AUDIT-A2 M3, `dedupe_split`): a held-out kernel with the same op and shapes as a training kernel (e.g.
+xf_attention.h = xf_mlp.h) is reassigned to train, and a held-out program whose feature vector equals a training
+program's is dropped; split.json records both.
 
 Files (data/cost/): kernels.json, configs.json, split.json, programs.jsonl.gz (one record per program: kernel,
 class, candidate, static stats, program features), rows.jsonl.gz (one per program x config), model_graph.json.gz.
@@ -337,8 +340,10 @@ def _work(item):
         prec = {"pid": pid, "kid": spec.kid, "W": W, "candidate": b.cand.to_dict(), "stats": b.features(),
                 "ok": ok, "why": why}
         if ok:
+            tp = time.time()
             prof = profile(b.job)
-            if prof.memory[:b.plan.scratch] != list(ri.memory[:b.plan.scratch]):
+            t_prof = time.time() - tp
+            if prof.memory[:len(b.job.data)] != list(ri.memory[:len(b.job.data)]):
                 prec.update(ok=False, why="profile memory differs from isasim")
             prec["pf"] = program_features(prof, b.features())
         programs.append(prec)
@@ -350,6 +355,7 @@ def _work(item):
             job.params, job.mem_latency = params, lat
             ta = time.time()
             t1 = predict_profile(prof, params, lat)
+            tm = time.time()
             cf = closed_form(prof, params, lat)
             tb = time.time()
             try:
@@ -360,15 +366,61 @@ def _work(item):
                 for lr in rv.launches:
                     for c_, v in lr.counters.items():
                         cs[c_] = cs.get(c_, 0) + v
-                mem_ok = rv.memory[:b.plan.scratch] == list(ri.memory[:b.plan.scratch])
+                mem_ok = list(rv.memory[:len(job.data)]) == list(ri.memory[:len(job.data)])   # whole job (A1-M1)
                 err = "" if mem_ok else "verilator memory differs from isasim"
             except Exception as e:                     # timeouts etc. are recorded as failures
                 cycles, lc, cs, err = None, None, {}, f"{type(e).__name__}: {str(e)[:200]}"
             tc = time.time()
             rows.append({"pid": pid, "cid": cid, "cycles": cycles if not err else None, "launch_cycles": lc,
                          "t1": t1.cycles, "t1_launch": t1.launch_cycles, "t1_bd": t1.breakdown, "closed": cf,
-                         "counters": cs, "err": err, "t_model": round(tb - ta, 4), "t_sim": round(tc - tb, 4)})
+                         "counters": cs, "err": err,
+                         # wall time of a prediction: t_model = the headline model's inputs (functional profile of
+                         # the program + closed form; tier2_static), t_tier1 = the event model, t_sim = Verilator
+                         "t_model": round(t_prof + tb - tm, 4), "t_tier1": round(tm - ta, 4),
+                         "t_sim": round(tc - tb, 4)})
     return spec.kid, W, programs, rows, {**st, "seconds": round(time.time() - t0, 1), "n": len(builts)}
+
+
+def kernel_class(spec: KernelSpec) -> str:
+    """Equivalence class of a kernel for the split: op kind and the shapes it reads and writes (constants such as
+    requant M, s and LUT contents aside). Two kernels of one class compile to programs of the same shape."""
+    k = spec.kernel
+    bufs = spec.program.buffers
+    shp = lambda syms: [list(bufs[x][0]) if x in bufs else None for x in syms]   # noqa: E731
+    return json.dumps([k.op, shp(k.reads), shp(k.writes)])
+
+
+def program_key(p) -> str:
+    """Identity of a program for the cost model: its whole profile-feature vector (footprint aside), warps per
+    core and size (AUDIT-A2 M3's twin test)."""
+    pf = {k: v for k, v in p["pf"].items() if k != "footprint"}
+    return json.dumps([pf, p["W"], p["stats"].get("words")], sort_keys=True)
+
+
+def dedupe_split(kernels_meta, programs, rows):
+    """Make the held-out kernels held out (AUDIT-A2 M3): (1) a held-out kernel whose class (op + shapes, see
+    kernel_class) has a training kernel is reassigned to train; (2) a held-out program whose features equal a
+    training program's is dropped with its rows. Returns (programs, rows, record of what changed)."""
+    train_cls = {}
+    for kid, m in kernels_meta.items():
+        if m["split"] == "train":
+            train_cls.setdefault(m["class"], kid)
+    reassigned = {}
+    for kid, m in kernels_meta.items():
+        if m["split"] == "test" and m["class"] in train_cls:
+            m["split"] = "train"
+            reassigned[kid] = train_cls[m["class"]]
+    train_keys = {program_key(p) for p in programs if p["ok"] and kernels_meta[p["kid"]]["split"] == "train"}
+    drop = {p["pid"] for p in programs if p["ok"] and kernels_meta[p["kid"]]["split"] == "test"
+            and program_key(p) in train_keys}
+    by_kernel = {}
+    for p in programs:
+        if p["pid"] in drop:
+            by_kernel[p["kid"]] = by_kernel.get(p["kid"], 0) + 1
+    programs = [p for p in programs if p["pid"] not in drop]
+    rows = [r for r in rows if r["pid"] not in drop]
+    return programs, rows, {"reassigned": reassigned, "dropped_programs": len(drop),
+                            "dropped_by_kernel": dict(sorted(by_kernel.items()))}
 
 
 def _prebuild(cids):
@@ -410,14 +462,18 @@ def build_dataset(out=DATA, workers=4, kernels=None, n_cand=None, log=print):
     kernels_meta = {}
     for s in _SUITE:
         k = s.kernel
-        kernels_meta[s.kid] = {"group": s.group, "op": k.op, "name": s.name,
+        kernels_meta[s.kid] = {"group": s.group, "op": k.op, "name": s.name, "class": kernel_class(s),
                                "split": "test" if s.kid in HELDOUT_KERNELS else "train"}
+    programs, rows, dedup = dedupe_split(kernels_meta, programs, rows)
+    log(f"dedupe: {len(dedup['reassigned'])} held-out kernels reassigned to train (same op and shapes as a train "
+        f"kernel), {dedup['dropped_programs']} held-out programs dropped (feature-identical to a train program)")
     (out / "kernels.json").write_text(json.dumps(kernels_meta, indent=1, sort_keys=True) + "\n")
     (out / "configs.json").write_text(json.dumps(
         {c: {"params": o, "mem_latency": lat, "split": "test" if c in HELDOUT_CONFIGS else "train"}
          for c, (o, lat) in CONFIGS.items()}, indent=1, sort_keys=True) + "\n")
-    (out / "split.json").write_text(json.dumps({"heldout_kernels": list(HELDOUT_KERNELS),
-                                                "heldout_configs": list(HELDOUT_CONFIGS)}, indent=1) + "\n")
+    held = [k for k in HELDOUT_KERNELS if kernels_meta.get(k, {}).get("split") == "test"]
+    (out / "split.json").write_text(json.dumps({"heldout_kernels": held, "heldout_configs": list(HELDOUT_CONFIGS),
+                                                "dedupe": dedup}, indent=1) + "\n")
     with gzip.open(out / "programs.jsonl.gz", "wt") as f:
         for p in programs:
             f.write(json.dumps(p, sort_keys=True) + "\n")
@@ -440,7 +496,7 @@ class Dataset:
     split: dict
 
     def is_test_kernel(self, kid):
-        return kid in self.split["heldout_kernels"]
+        return kid in self.split["heldout_kernels"] and self.kernels.get(kid, {}).get("split", "test") == "test"
 
     def is_test_config(self, cid):
         return cid in self.split["heldout_configs"]

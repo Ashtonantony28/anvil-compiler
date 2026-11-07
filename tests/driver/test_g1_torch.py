@@ -101,3 +101,34 @@ def test_no_hand_written_assembly(monkeypatch):
             full, _ = assert_golden(cm, block, 0)
             for launch in full.job.job.launches:
                 assert tuple(x for i, x in enumerate(launch.program) if i not in (0, 4)) not in hand
+
+
+@pytest.mark.parametrize("block", BLOCKS)
+def test_contract8_segment_gains_on_compiled_runs(block):
+    """A2-M1 (G1 part): the compiled chain's own outputs, not only the graph interpreter's, meet contract 8's
+    per-segment rule (xf export.SEGMENTS: |gain - HEAD| <= GAIN_TOL, RMS <= HEAD * RMS_TOL), pooled over 64 of
+    xf's held-out inputs run on isasim with every segment readable (keep="all")."""
+    import os
+
+    cm = compiled(block, "tiled")
+    n, sx = 64, cm.scale("x")
+    xq = xe.quantize(np.random.default_rng(xe.HELDOUT_SEED).standard_normal((n, xe.T, xe.N_EMBD)), sx)
+    blk = xe.build_block(os.environ["NANOGPT_DIR"])
+    ref = (xe.float_acts if block == "mlp_block" else xe.float_attention)(blk, xq * sx)
+    segs = list(xe.SEGMENTS[block])
+    got = {k: [] for k in segs}
+    for x in xq:
+        r = cm.run(x, quantized=True, keep="all")
+        for k in segs:
+            got[k].append(r.ints[k])
+    causal = np.tril(np.ones((xe.T, xe.T), dtype=bool))
+    stats = {}
+    for k in segs:
+        s = cm.scale(k)
+        q, rf = np.asarray(got[k]) * s, np.asarray(ref[k])
+        if k == "scores":
+            q, rf = q[..., causal], rf[..., causal]
+        stats[k] = (float((q * rf).sum() / (rf * rf).sum()), float(np.sqrt(((q - rf) ** 2).mean())) / s)
+    assert not xe.segment_errors(block, stats), stats
+    hit = {**stats, OUT[block]: (stats[OUT[block]][0] * 1.01, stats[OUT[block]][1])}
+    assert OUT[block] in xe.segment_errors(block, hit)              # not vacuous: a 1 % output gain error fails

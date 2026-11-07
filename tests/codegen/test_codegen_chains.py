@@ -9,7 +9,7 @@ from anvil.frontend import from_image
 from anvil.lower.graph_to_tensor import lower
 from anvil.runtime import run
 from anvil.schedule import Schedule, ScheduleError, templates as T
-from codegen_util import flags_clean, params, target
+from codegen_util import bad_flags, params, target
 from xf import fixture
 
 PLANS = {
@@ -45,7 +45,8 @@ def test_chain_golden_on_isasim(block, cfg, plan):
     cks = compile_chain(prog, p, plan)
     jp = program_job(prog, cks, {**consts, "x": d["inputs"]["x"]}, p)
     r = run(jp.job)
-    assert not flags_clean(r, p.SIMT_STACK)
+    assert not bad_flags(r, p.SIMT_STACK)
+    assert not jp.stray_writes(r.memory, unchanged=list(consts))      # whole memory (A1-M3)
     for name, want in d["golden"].items():
         if name in jp.buffers:
             assert np.array_equal(jp.read(r.memory, name), want), name

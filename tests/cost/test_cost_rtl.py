@@ -83,6 +83,10 @@ def test_g4_tau_heldout(ds):
         for cid, d in tab.items():
             assert d["pooled"] >= TAU_TARGET, (name, cid, d["pooled"])
             assert d["within_mean"] >= TAU_TARGET, (name, cid, d["within_mean"])
+    # the headline model (AUDIT-A2 M2): no event model, cheaper than measuring; pooled tau is the G4 claim
+    tab = tau_table(meta, yt, CostModel.load(model_path("tier2_static", 0)).predict(X))
+    for cid, d in tab.items():
+        assert d["pooled"] >= TAU_TARGET, ("tier2_static", cid, d["pooled"])
 
 
 def test_g4_failures_reported(ds):

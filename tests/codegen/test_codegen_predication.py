@@ -10,7 +10,7 @@ from anvil.ir.graph import GraphBuilder
 from anvil.lower.graph_to_tensor import Kernel, lower
 from anvil.runtime import run
 from anvil.schedule import Schedule, canonicalize, templates as T
-from codegen_util import check_kernel, flags_clean, params, schedule, target
+from codegen_util import check_kernel, bad_flags, params, schedule, target
 
 RNG = np.random.default_rng(7)
 
@@ -190,7 +190,8 @@ def test_launch_splitting(tpl, cfg):
         assert ("block_offset", None) in ck.slots
     jp = program_job(prog, {k.name: ck}, vals, p)
     r = run(jp.job)
-    assert not flags_clean(r, p.SIMT_STACK)
+    assert not bad_flags(r, p.SIMT_STACK)
+    assert not jp.stray_writes(r.memory, unchanged=[s for s in jp.buffers if s != "c"])   # A1-M3 (kills M02)
     assert np.array_equal(jp.read(r.memory, "c"), ref["c"])
     assert all(ln.threads <= 255 for ln in jp.job.launches)
 

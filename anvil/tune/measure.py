@@ -31,7 +31,7 @@ from ..runtime import GpuParams, run
 from ..schedule import ScheduleError, Target
 from .space import Candidate, build_schedule, compile_options
 
-FLAGS = ("divergent", "stores_conflict", "store_races")
+FLAGS = ("divergent", "stores_conflict", "store_races", "block_races")
 
 
 def default_cache_dir() -> Path:
@@ -154,11 +154,16 @@ def build(task: Task, cand: Candidate):
 
 
 def execute(job, backend="verilator", *, timing=True, scratch=None) -> dict:
-    """Run on isasim (results + race/divergence flags) and, when `timing`, on the timing backend. The two memories
-    must agree below `scratch` (the sink/spill words hold don't-care values of masked-off lanes, which isasim and
-    the RTL may compute differently)."""
+    """Run on isasim with the cross-block race check (results, race/divergence flags, `block_races`: words one
+    block writes that another block of the same launch reads or writes, anvil.runtime.check_races) and, when
+    `timing` and the flags are clean, on the timing backend. The two memories must agree on every word of the job,
+    sink/spill scratch included (masked-off lanes load nothing racy since AUDIT-A1 M1, so the scratch words are
+    deterministic too). `scratch` is accepted for compatibility and ignored."""
+    from ..runtime import check_races
     t0 = time.time()
-    ri = run(job, "isasim")
+    rr = check_races(job)
+    ri = rr.result
+    ri.flags["block_races"] = rr.races
     out = {"memory": ri.memory, "flags": {k: len(ri.flags.get(k, [])) for k in FLAGS}, "cycles": None,
            "counters": {}, "launch_cycles": None}
     if timing and not any(out["flags"].values()) and backend == "isasim":
@@ -174,14 +179,18 @@ def execute(job, backend="verilator", *, timing=True, scratch=None) -> dict:
             for c, v in lr.counters.items():
                 cs[c] = cs.get(c, 0) + v
         out["counters"] = cs
-        n = len(job.data) if scratch is None else scratch
-        out["timing_memory_equal"] = rv.memory[:n] == ri.memory[:n]
-        out["scratch_differs"] = rv.memory[n:len(job.data)] != ri.memory[n:len(job.data)]
+        n = len(job.data)
+        out["timing_memory_equal"] = list(rv.memory[:n]) == list(ri.memory[:n])
     out["seconds"] = time.time() - t0
     return out
 
 
 def verdict(task: Task, b: Built, memory) -> tuple[bool, str]:
+    """Bit-exact on every buffer the kernel writes, and no other word changed: nothing outside the job's buffers
+    (args blocks, past the job) and none of the input buffers (AUDIT-A1 M3); scratch words are free."""
+    stray = b.plan.stray_writes(memory, unchanged=[s for s in task.values if s in b.plan.buffers and s not in task.ref])
+    if stray:
+        return False, f"{len(stray)} words outside the outputs changed, e.g. {stray[:4]}"
     for s, want in task.ref.items():
         got = b.plan.read(memory, s)
         if not np.array_equal(got.reshape(np.shape(want)), want):
@@ -236,5 +245,4 @@ def record(task: Task, b: Built, raw: dict) -> dict:
         ok, why = False, "timing backend memory differs from isasim"
     return {"ok": ok, "why": why, "cycles": raw["cycles"] if ok else None, "launch_cycles": raw.get("launch_cycles"),
             "counters": raw.get("counters", {}), "flags": flags, "verified_on": task.data_hash,
-            "words": b.words, "threads": b.threads,
-            "scratch_differs": bool(raw.get("scratch_differs", False))}
+            "words": b.words, "threads": b.threads}

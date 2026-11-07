@@ -1,329 +1,384 @@
 {
  "model.L0.act": {
+  "class": "[\"lut_mul\", [[256], [16, 64], [16, 64]], [[16, 64]]]",
   "group": "model",
   "name": "L0.act",
   "op": "lut_mul",
   "split": "train"
  },
  "model.L0.down": {
+  "class": "[\"qlinear\", [[16, 64], [64, 32]], [[16, 32]]]",
   "group": "model",
   "name": "L0.down",
   "op": "qlinear",
   "split": "test"
  },
  "model.L0.gate": {
+  "class": "[\"qlinear\", [[16, 32], [32, 64]], [[16, 64]]]",
   "group": "model",
   "name": "L0.gate",
   "op": "qlinear",
   "split": "train"
  },
  "model.L0.h1": {
+  "class": "[\"rmsnorm_int\", [[16, 32], [32], [1024]], [[16, 32]]]",
   "group": "model",
   "name": "L0.h1",
   "op": "rmsnorm_int",
   "split": "train"
  },
  "model.L0.kT": {
+  "class": "[\"transpose\", [[2, 16, 16]], [[2, 16, 16]]]",
   "group": "model",
   "name": "L0.kT",
   "op": "transpose",
   "split": "test"
  },
  "model.L0.o": {
+  "class": "[\"qmatmul\", [[2, 16, 16], [2, 16, 16]], [[2, 16, 16]]]",
   "group": "model",
   "name": "L0.o",
   "op": "qmatmul",
   "split": "train"
  },
  "model.L0.om.t": {
+  "class": "[\"transpose\", [[2, 16, 16]], [[16, 2, 16]]]",
   "group": "model",
   "name": "L0.om.t",
   "op": "transpose",
   "split": "train"
  },
  "model.L0.out": {
+  "class": "[\"add_requant\", [[16, 32], [16, 32]], [[16, 32]]]",
   "group": "model",
   "name": "L0.out",
   "op": "add_requant",
   "split": "train"
  },
  "model.L0.p": {
+  "class": "[\"softmax_lut\", [[2, 16, 16], [256]], [[2, 16, 16]]]",
   "group": "model",
   "name": "L0.p",
   "op": "softmax_lut",
   "split": "test"
  },
  "model.L0.q": {
+  "class": "[\"qlinear\", [[16, 32], [32, 32]], [[16, 32]]]",
   "group": "model",
   "name": "L0.q",
   "op": "qlinear",
   "split": "train"
  },
  "model.L0.qh": {
+  "class": "[\"transpose\", [[16, 32]], [[2, 16, 16]]]",
   "group": "model",
   "name": "L0.qh",
   "op": "transpose",
   "split": "train"
  },
  "model.L0.r1": {
+  "class": "[\"add_requant\", [[16, 32], [16, 32]], [[16, 32]]]",
   "group": "model",
   "name": "L0.r1",
   "op": "add_requant",
-  "split": "test"
+  "split": "train"
  },
  "model.L0.scores": {
+  "class": "[\"qmatmul\", [[2, 16, 16], [2, 16, 16]], [[2, 16, 16]]]",
   "group": "model",
   "name": "L0.scores",
   "op": "qmatmul",
-  "split": "test"
+  "split": "train"
  },
  "model.L0.y": {
+  "class": "[\"qlinear\", [[16, 2, 16], [32, 32]], [[16, 32]]]",
   "group": "model",
   "name": "L0.y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.add_12x12": {
+  "class": "[\"add_requant\", [[12, 12], [12, 12]], [[12, 12]]]",
   "group": "syn",
   "name": "y",
   "op": "add_requant",
   "split": "train"
  },
  "syn.add_5x8": {
+  "class": "[\"add_requant\", [[5, 8], [5, 8]], [[5, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "add_requant",
   "split": "train"
  },
  "syn.lut_24": {
+  "class": "[\"lut\", [[256], [24]], [[24]]]",
   "group": "syn",
   "name": "y",
   "op": "lut",
   "split": "train"
  },
  "syn.lut_4x16": {
+  "class": "[\"lut\", [[256], [4, 16]], [[4, 16]]]",
   "group": "syn",
   "name": "y",
   "op": "lut",
   "split": "train"
  },
  "syn.lut_mul_16x8": {
+  "class": "[\"lut_mul\", [[256], [16, 8], [16, 8]], [[16, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "lut_mul",
   "split": "test"
  },
  "syn.lut_mul_6x8": {
+  "class": "[\"lut_mul\", [[256], [6, 8], [6, 8]], [[6, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "lut_mul",
   "split": "train"
  },
  "syn.qlinear_12x8x8": {
+  "class": "[\"qlinear\", [[12, 8], [8, 8]], [[12, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_2x16x16": {
+  "class": "[\"qlinear\", [[2, 16], [16, 16]], [[2, 16]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_2x8x8": {
+  "class": "[\"qlinear\", [[2, 8], [8, 8]], [[2, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_3x12x8": {
+  "class": "[\"qlinear\", [[3, 8], [8, 12]], [[3, 12]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "test"
  },
  "syn.qlinear_4x4x8": {
+  "class": "[\"qlinear\", [[4, 8], [8, 4]], [[4, 4]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_4x8x4": {
+  "class": "[\"qlinear\", [[4, 4], [4, 8]], [[4, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_6x8x16": {
+  "class": "[\"qlinear\", [[6, 16], [16, 8]], [[6, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qlinear_8x4x12": {
+  "class": "[\"qlinear\", [[8, 12], [12, 4]], [[8, 4]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "test"
  },
  "syn.qlinear_8x8x8": {
+  "class": "[\"qlinear\", [[8, 8], [8, 8]], [[8, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qlinear",
   "split": "train"
  },
  "syn.qmatmul_4x6x8": {
+  "class": "[\"qmatmul\", [[4, 8], [8, 6]], [[4, 6]]]",
   "group": "syn",
   "name": "y",
   "op": "qmatmul",
   "split": "train"
  },
  "syn.qmatmul_8x8x4": {
+  "class": "[\"qmatmul\", [[8, 4], [4, 8]], [[8, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "qmatmul",
   "split": "train"
  },
  "syn.rmsnorm_2x16": {
+  "class": "[\"rmsnorm_int\", [[2, 16], [16], [1024]], [[2, 16]]]",
   "group": "syn",
   "name": "y",
   "op": "rmsnorm_int",
   "split": "train"
  },
  "syn.rmsnorm_6x12": {
+  "class": "[\"rmsnorm_int\", [[6, 12], [12], [1024]], [[6, 12]]]",
   "group": "syn",
   "name": "y",
   "op": "rmsnorm_int",
   "split": "test"
  },
  "syn.rmsnorm_8x8": {
+  "class": "[\"rmsnorm_int\", [[8, 8], [8], [1024]], [[8, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "rmsnorm_int",
   "split": "train"
  },
  "syn.softmax_12x12": {
+  "class": "[\"softmax_lut\", [[12, 12], [256]], [[12, 12]]]",
   "group": "syn",
   "name": "y",
   "op": "softmax_lut",
   "split": "test"
  },
  "syn.softmax_2x4x4": {
+  "class": "[\"softmax_lut\", [[2, 4, 4], [256]], [[2, 4, 4]]]",
   "group": "syn",
   "name": "y",
   "op": "softmax_lut",
   "split": "train"
  },
  "syn.softmax_8x8": {
+  "class": "[\"softmax_lut\", [[8, 8], [256]], [[8, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "softmax_lut",
   "split": "train"
  },
  "syn.transpose_6x10": {
+  "class": "[\"transpose\", [[6, 10]], [[10, 6]]]",
   "group": "syn",
   "name": "y",
   "op": "transpose",
   "split": "test"
  },
  "syn.transpose_8x4": {
+  "class": "[\"transpose\", [[8, 4]], [[4, 8]]]",
   "group": "syn",
   "name": "y",
   "op": "transpose",
   "split": "train"
  },
  "xf_attention.h": {
+  "class": "[\"rmsnorm_int\", [[4, 8], [8], [1024]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "h",
   "op": "rmsnorm_int",
-  "split": "test"
+  "split": "train"
  },
  "xf_attention.k": {
+  "class": "[\"qlinear\", [[4, 8], [8, 8]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "k",
   "op": "qlinear",
   "split": "test"
  },
  "xf_attention.kT": {
+  "class": "[\"transpose\", [[4, 8]], [[8, 4]]]",
   "group": "xf_attention",
   "name": "kT",
   "op": "transpose",
   "split": "test"
  },
  "xf_attention.o": {
+  "class": "[\"qmatmul\", [[4, 4], [4, 8]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "o",
   "op": "qmatmul",
   "split": "test"
  },
  "xf_attention.p": {
+  "class": "[\"softmax_lut\", [[4, 4], [256]], [[4, 4]]]",
   "group": "xf_attention",
   "name": "p",
   "op": "softmax_lut",
   "split": "test"
  },
  "xf_attention.q": {
+  "class": "[\"qlinear\", [[4, 8], [8, 8]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "q",
   "op": "qlinear",
   "split": "test"
  },
  "xf_attention.scores": {
+  "class": "[\"qmatmul\", [[4, 8], [8, 4]], [[4, 4]]]",
   "group": "xf_attention",
   "name": "scores",
   "op": "qmatmul",
   "split": "test"
  },
  "xf_attention.v": {
+  "class": "[\"qlinear\", [[4, 8], [8, 8]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "v",
   "op": "qlinear",
   "split": "test"
  },
  "xf_attention.y": {
+  "class": "[\"qlinear\", [[4, 8], [8, 8]], [[4, 8]]]",
   "group": "xf_attention",
   "name": "y",
   "op": "qlinear",
   "split": "test"
  },
  "xf_mlp.act": {
+  "class": "[\"lut_mul\", [[256], [4, 16], [4, 16]], [[4, 16]]]",
   "group": "xf_mlp",
   "name": "act",
   "op": "lut_mul",
   "split": "train"
  },
  "xf_mlp.down": {
+  "class": "[\"qlinear\", [[4, 16], [16, 8]], [[4, 8]]]",
   "group": "xf_mlp",
   "name": "down",
   "op": "qlinear",
   "split": "train"
  },
  "xf_mlp.gate": {
+  "class": "[\"qlinear\", [[4, 8], [8, 16]], [[4, 16]]]",
   "group": "xf_mlp",
   "name": "gate",
   "op": "qlinear",
   "split": "train"
  },
  "xf_mlp.h": {
+  "class": "[\"rmsnorm_int\", [[4, 8], [8], [1024]], [[4, 8]]]",
   "group": "xf_mlp",
   "name": "h",
   "op": "rmsnorm_int",
   "split": "train"
  },
  "xf_mlp.out": {
+  "class": "[\"add_requant\", [[4, 8], [4, 8]], [[4, 8]]]",
   "group": "xf_mlp",
   "name": "out",
   "op": "add_requant",
   "split": "train"
  },
  "xf_mlp.up": {
+  "class": "[\"qlinear\", [[4, 8], [8, 16]], [[4, 16]]]",
   "group": "xf_mlp",
   "name": "up",
   "op": "qlinear",
   "split": "train"
  },
  "xf_mm.y": {
+  "class": "[\"qlinear\", [[1, 8], [8, 8]], [[1, 8]]]",
   "group": "xf_mm",
   "name": "y",
   "op": "qlinear",

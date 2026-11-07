@@ -43,8 +43,6 @@ def _y_kernel_job(p=GpuParams()):
 # --------------------------------------------------------------------------------------------- A1-M1
 
 @pytest.mark.rtl
-@pytest.mark.xfail(strict=True, reason="A1-M1: masked-off lanes load out-of-bounds words that other cores are "
-                                       "writing in the same launch (cross-core read/write race)")
 def test_a1_m1_masked_off_lanes_do_not_race_other_cores():
     """Every word of the job (sink scratch included) is a deterministic function of the inputs: the cycle-level
     simulator, where blocks run concurrently on two cores, ends with exactly isasim's memory. Today block 1's
@@ -54,8 +52,6 @@ def test_a1_m1_masked_off_lanes_do_not_race_other_cores():
     assert rv.memory[:jp.end] == ri.memory[:jp.end]
 
 
-@pytest.mark.xfail(strict=True, reason="A1-M1: codegen emits global loads for inactive lanes at addresses outside "
-                                       "every buffer the kernel reads (canonical rule 2 says they must not load)")
 def test_a1_m1_inactive_lane_loads_stay_inside_read_buffers():
     """isasim-free form of A1-M1 (runs in make check): trace the allocated program per thread; threads whose lane is
     outside the bound lane extent (lanes 2-3 here) must load nothing outside the buffers the kernel reads. Today
@@ -64,7 +60,10 @@ def test_a1_m1_inactive_lane_loads_stay_inside_read_buffers():
     reads = _inactive_lane_load_addresses(ck, jp)
     a = jp.addresses
     inputs = set(range(a["x"], a["x"] + 8)) | set(range(a["w"], a["w"] + 64))
-    assert reads <= inputs, sorted(reads - inputs)[:8]
+    base = jp.args[0][2]
+    args = set(range(base, base + len(ck.slots)))      # every thread reads its launch's args block (ABI v1)
+    assert reads <= inputs | args, sorted(reads - inputs - args)[:8]
+    assert reads & set(range(a["y"], a["y"] + 8)) == set()
 
 
 def _inactive_lane_load_addresses(ck, jp):
@@ -116,7 +115,6 @@ def _inactive_lane_load_addresses(ck, jp):
 
 # --------------------------------------------------------------------------------------------- A1-M2
 
-@pytest.mark.xfail(strict=True, reason="A1-M2: the code generator accepts WORD_BITS < 32 and emits 32-bit code")
 @pytest.mark.parametrize("bits", [16, 24])
 def test_a1_m2_word_bits_below_32_rejected(bits):
     """Anvil's codegen, constants and requant idioms assume 32-bit words; a narrower GpuParams must be rejected
@@ -130,8 +128,6 @@ def test_a1_m2_word_bits_below_32_rejected(bits):
 
 # --------------------------------------------------------------------------------------------- A1-M3
 
-@pytest.mark.xfail(strict=True, reason="A1-M3: the codegen/driver test oracles compare only the kernel's named "
-                                       "buffers, so out-of-bounds writes elsewhere in memory go unnoticed")
 def test_a1_m3_check_kernel_catches_stray_writes(monkeypatch):
     """codegen_util.check_kernel (the C4 level-4 oracle of tests/codegen) must fail when the run changes a word that
     belongs to no buffer of the kernel (here the first word past the job's data). Today it only
@@ -222,5 +218,5 @@ def test_a1_row_per_block_ragged_rows(op, cfg):
     ck = compile_kernel(fin, p)
     jp = kernel_job(ck, {s: v for s, v in vals.items() if s in ck.buffers})
     r = run(jp.job, "isasim")
-    assert not cu.flags_clean(r, p.SIMT_STACK)
+    assert not cu.bad_flags(r, p.SIMT_STACK)
     assert np.array_equal(jp.read(r.memory, "y"), want)

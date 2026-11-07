@@ -35,6 +35,7 @@ __all__ = [
     "check_i32", "check_i8", "clamp_i8", "matmul_i8", "relu", "requant", "residual_add", "rmsnorm_int",
     "rsqrt_index", "softmax_lut", "swiglu_lut",
     "round_term", "requant_var", "qmatmul", "lut_lookup", "lut_i8", "add_requant",
+    "DT_RANGE", "check_dtype", "clamp_dtype", "requant_dtype", "rmsnorm_wide", "sq_shift",
     "add_i32", "sub_i32", "mul_i32", "max_i32", "min_i32", "div_floor", "sra_i32", "cmp",
     "wrap", "to_signed", "w_add", "w_sub", "w_mul", "w_div", "w_sra", "w_max", "w_cmp_nzp",
     "NZP_N", "NZP_Z", "NZP_P",
@@ -91,15 +92,94 @@ def lut_i8(x, table):
     return table[x + 128]
 
 
-def qmatmul(a, b, m, s, lut=None):
-    """requant(a @ b, m, s), then the optional fused unary LUT epilogue lut[. + 128]."""
+def qmatmul(a, b, m, s, lut=None, dtype="i8"):
+    """requant(a @ b, m, s), then the optional fused unary LUT epilogue lut[. + 128]; an i16 result (no LUT)
+    clamps to int16 (ADR-004)."""
+    if dtype != "i8":
+        if lut is not None:
+            raise ValueError("a LUT epilogue needs an i8 result")
+        return requant_dtype(matmul_i8(a, b), m, s, dtype)
     out = requant(matmul_i8(a, b), m, s)
     return out if lut is None else lut_i8(out, lut)
 
 
-def add_requant(a, b, ma, mb, s):
-    """Scale-aligned residual (golden.residual_add)."""
-    return residual_add(a, b, ma, mb, s)
+def add_requant(a, b, ma, mb, s, dtype="i8"):
+    """Scale-aligned residual clamp((a*Ma + b*Mb + 2^(s-1)) >> s) to `dtype`. All-i8 operands and result: exactly
+    golden.residual_add. Otherwise (SG9's wide residual stream, ADR-004) a and b may each be i8 or i16 and the
+    result is clamped to `dtype`, with every intermediate checked against int32 in the same order."""
+    a, b = np.asarray(a, dtype=np.int64), np.asarray(b, dtype=np.int64)
+    if dtype == "i8" and _is_i8(a) and _is_i8(b):
+        return residual_add(a, b, ma, mb, s)
+    a, b = check_dtype(a, "i16", "a"), check_dtype(b, "i16", "b")
+    acc = check_i32(check_i32(a * int(ma), "a*Ma") + check_i32(b * int(mb), "b*Mb"), "a*Ma + b*Mb")
+    return requant_dtype(acc, 1, s, dtype)
+
+
+# ------------------------------------------------------------------------------------- wide values (ADR-004)
+# The residual stream may be i16 (one value per 32-bit word, like every other value). Requant results clamp to
+# their dtype's range; rmsnorm accepts an i16 row and sums rounded-shifted squares so the sum stays in int32.
+
+DT_RANGE = {"i8": I8, "i16": (-(1 << 15), (1 << 15) - 1), "i32": I32}
+
+
+def _is_i8(x):
+    return not x.size or (x.min() >= I8[0] and x.max() <= I8[1])
+
+
+def check_dtype(x, dtype, what="value"):
+    """x as int64 numpy, raising ValueError if any element leaves `dtype`'s range (OverflowError for i32)."""
+    if dtype == "i32":
+        return check_i32(x, what)
+    if dtype == "i8":
+        return check_i8(x, what)
+    lo, hi = DT_RANGE[dtype]
+    x = np.asarray(x, dtype=np.int64)
+    if x.size and (x.min() < lo or x.max() > hi):
+        raise ValueError(f"{what} is not int{dtype[1:]}")
+    return x
+
+
+def clamp_dtype(x, dtype):
+    return np.clip(x, *DT_RANGE[dtype])
+
+
+def requant_dtype(acc, m, s, dtype="i8"):
+    """golden.requant clamped to `dtype` instead of int8 (identical for i8)."""
+    if dtype == "i8":
+        return requant(acc, m, s)
+    if not 0 <= s <= 31:
+        raise ValueError(f"shift {s} outside [0, 31]")
+    acc = check_i32(acc, "acc")
+    prod = check_i32(acc * int(m), "acc*M")
+    rounded = check_i32(prod + round_term(s), "acc*M + round")
+    return clamp_dtype(rounded >> s, dtype)
+
+
+def sq_shift(x, c):
+    """Rounded right shift of the square: (x*x + 2^(c-1)) >> c, the term rmsnorm sums for a wide row."""
+    sq = check_i32(x * x, "x*x")
+    return check_i32(sq + round_term(c), "x*x + round") >> int(c)
+
+
+def rmsnorm_wide(x, w, rsqrt_lut, m, s, ss_shift=0, ss_init=0, xdtype="i8"):
+    """rmsnorm_int with an i8 or i16 input row: ss = e + sum((x^2 + 2^(c-1)) >> c), c = ss_shift, e = ss_init
+    (eps folded into the sum, so the LUT holds an eps-free rsqrt that is exact at every shift k); then exactly
+    golden.rmsnorm_int's index, LUT and requant (int8 result). With an i8 input and c = e = 0 it is
+    golden.rmsnorm_int."""
+    x = np.asarray(x, dtype=np.int64)
+    if xdtype == "i8" and int(ss_shift) == 0 and int(ss_init) == 0:
+        return rmsnorm_int(x, w, rsqrt_lut, m, s)
+    x, w = check_dtype(x, xdtype, "x"), check_i8(w, "w")
+    lut = check_i32(rsqrt_lut, "rsqrt_lut")
+    if lut.ndim != 1 or lut.min() < 0:
+        raise ValueError("rsqrt_lut must be a non-negative 1-D table")
+    ss = check_i32(sq_shift(x, ss_shift).sum(axis=-1) + int(ss_init), "sum of squares")
+    idx, k = rsqrt_index(ss, len(lut))
+    xwr = check_i32(check_i32(x * w, "x*w") * lut[idx][..., None], "x*w*r")
+    out = np.empty_like(xwr)
+    for kv in np.unique(k):
+        out[k == kv] = requant(xwr[k == kv], m, s + int(kv))
+    return out
 
 
 # ---------------------------------------------------------------------------------- checked int32 scalar ALU

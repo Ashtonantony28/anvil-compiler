@@ -27,6 +27,7 @@ import numpy as np
 from xdsl.dialects.builtin import ModuleOp, StringAttr
 from xdsl.ir.affine import AffineExpr, AffineMap
 
+from .. import semantics as sem
 from ..interp import tensor as ti
 from ..ir import graph as g
 from ..ir import tensor as t
@@ -137,7 +138,7 @@ class _KB:
         sym = self.L.sym(value)
         ty = g.qt(value)
         self.writes.append(sym)
-        return self.buf(sym, ty.dims, ty.dtype)
+        return self.buf(sym, ty.dims, _bdtype(ty.dtype))
 
     def temp(self, suffix, shape):
         sym = f"{self.name}.{suffix}"
@@ -186,6 +187,11 @@ def _i(attr):
     return int(attr.value.data)
 
 
+def _bdtype(dtype):
+    """Graph dtype -> tensor buffer dtype: i16 values (the wide residual stream, ADR-004) live in i32 words."""
+    return "i8" if dtype == "i8" else "i32"
+
+
 # -------------------------------------------------------------------------------------------- lowering
 
 class _Lowering:
@@ -222,7 +228,7 @@ class _Lowering:
             if isinstance(op, g.ReshapeOp):
                 self.views[sym] = (self.sym(op.x), ty.dims)
                 continue
-            self.buffers[sym] = (ty.dims, ty.dtype)
+            self.buffers[sym] = (ty.dims, _bdtype(ty.dtype))
             if isinstance(op, g.InputOp):
                 self.inputs.append(sym)
             elif isinstance(op, g.ConstOp):
@@ -252,12 +258,24 @@ def _matmul(L, op, sym):
     wv = k.load(w, wb + [kv[0], ivs[-1]])
     k.acc_update(acc, "add", b.mul(av, wv))
     k.close(kc)
-    r = b.requant(k.acc_load(acc), _i(op.M), _i(op.s))
+    r = _requant(b, k.acc_load(acc), _i(op.M), _i(op.s), g.qt(op.result).dtype)
     if lut is not None:
         r = b.gather(lut[0], r, 128)
     b.store(r, c, ivs)
     k.close(ctx)
     return k.kernel()
+
+
+def _requant(b, acc, m, s, dtype):
+    """requant to an i8 result (the tensor requant op), or to a wide (i16) result from tensor-IR arithmetic with
+    the same steps and the clamp at the dtype's range (ADR-004)."""
+    if dtype == "i8":
+        return b.requant(acc, m, s)
+    lo, hi = sem.DT_RANGE[dtype]
+    v = acc if m == 1 else b.mul(acc, b.const(m))
+    if s:
+        v = b.sra(b.add(v, b.const(1 << (s - 1))), b.const(s))
+    return b.min(b.max(v, b.const(lo)), b.const(hi))
 
 
 def _elementwise(opname, body):
@@ -286,7 +304,7 @@ def _add_requant(k, op, ivs):
     b = k.b
     x = b.mul(k.load(k.src(op.a), ivs), b.const(_i(op.Ma)))
     y = b.mul(k.load(k.src(op.b), ivs), b.const(_i(op.Mb)))
-    return b.requant(b.add(x, y), 1, _i(op.s))
+    return _requant(b, b.add(x, y), 1, _i(op.s), g.qt(op.result).dtype)
 
 
 def _transpose(k, op, ivs):
@@ -311,9 +329,15 @@ def _rmsnorm(L, op, sym):
     ss = k.acc(0)
     jv, jc = k.loops([D], ["stat.j"], "reduce")
     xv = k.load(x, ivs + jv)
-    k.acc_update(ss, "add", b.mul(xv, xv))
+    sq, c = b.mul(xv, xv), op.ss_shift_int
+    if c:                                          # wide input: (x^2 + 2^(c-1)) >> c (ADR-004)
+        sq = b.sra(b.add(sq, b.const(1 << (c - 1))), b.const(c))
+    k.acc_update(ss, "add", sq)
     k.close(jc)
-    idx, sh = b.rsqrt_index(k.acc_load(ss), n)
+    total = k.acc_load(ss)
+    if op.ss_init_int:                             # eps folded into the sum (wide input, ADR-004), added after the
+        total = b.add(total, b.const(op.ss_init_int))   # canonical 0-initialised reduction (cross-lane reducible)
+    idx, sh = b.rsqrt_index(total, n)
     b.store(b.gather(lut[0], idx), rs, ivs)
     b.store(sh, kk, ivs)
     k.close(ctx)

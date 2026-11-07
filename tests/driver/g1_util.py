@@ -43,6 +43,8 @@ def assert_golden(cm, block, i, backend="isasim"):
     reuse = cm.run(d["inputs"]["x"], backend, quantized=True)
     out = OUT[block]
     assert np.array_equal(reuse.ints[out], d["golden"][out]), (block, i, backend)
+    for r in (full, reuse):
+        assert not r.stray_writes(), (block, i, backend, r.stray_writes()[:8])     # whole memory (A1-M3)
     if backend == "isasim":
         for r in (full, reuse):
             assert not any(r.result.flags[k] for k in ("store_races", "stores_conflict", "divergent"))

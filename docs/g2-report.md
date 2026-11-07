@@ -9,18 +9,20 @@ by `anvil.frontend`, compiled by `anvil.compile` with the `default` and `tiled` 
 `GpuParams(DATA_MEM_ADDR_BITS=16)` (otherwise gpu.sv's defaults: 2 cores, 4 threads per block, one warp per core,
 no caches, no coalescing). No hand-written assembly.
 
-Checks (32 held-out inputs `x = sigma * z`, z from `HELDOUT_SEED`, sigma evenly over [0.5, 3], per preset): the
-output `L1.out` (and every other readable value) is bit-exact with the batched graph interpreter on isasim and on
-Verilator for all 32, and on iverilog for input 0; isasim raises no divergence / store-race / store-conflict flag;
-Verilator's per-kernel cycles are identical for every input and equal iverilog's. Max error vs the PyTorch module
-on `dequant(x_q)`: default 2.300, tiled 2.300 output LSB (TOL = 6).
+Checks (32 held-out inputs `x = sigma * z`, z from `HELDOUT_SEED`, sigma log-evenly over [0.02, 3.0],
+per preset): the output `L1.out` (and every other readable value) is bit-exact with the batched graph interpreter
+on isasim and on Verilator for all 32, and on iverilog for input 0; every readable segment's per-input gain and
+RMS error are within the contract's `INPUT_SEGMENTS` bounds (A2-M1); isasim raises no divergence / store-race /
+store-conflict flag; Verilator's per-kernel cycles are identical for every input and equal iverilog's. Max error
+vs the PyTorch module on `dequant(x_q)`: default 0.871, tiled 0.871 `OUT_UNIT`
+(TOL = 5.0; contract v2, ADR-004: i16 residual stream, sigma-range calibration).
 
 ## Summary
 
 | preset | total cycles | kernels | launches | max program words | spilling kernels | footprint | consts | activations (reuse) | activations (no reuse) | args | scratch |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| default | 6721506 | 40 | 120 | 125 | 0 | 30072 | 25728 | 3584 | 24320 | 760 | 0 |
-| tiled | 5534652 | 40 | 84 | 199 | 0 | 29808 | 25728 | 3584 | 24320 | 496 | 0 |
+| default | 6732468 | 40 | 120 | 125 | 0 | 30075 | 25728 | 3584 | 24320 | 763 | 0 |
+| tiled | 5545262 | 40 | 84 | 199 | 0 | 29811 | 25728 | 3584 | 24320 | 499 | 0 |
 
 Footprint in words of the 2^16-word data memory (`anvil.memplan`; the contract's no-reuse bound is
 50048). No kernel spills registers and every program is within the 256-word limit.
@@ -31,7 +33,7 @@ Kernels with more than 255 threads are split into several launches (`launches`).
 
 | kernel | op | default cycles | words | launches | tiled schedule | tiled cycles | words | launches | tiled / default |
 |---|---|---:|---:|---:|---|---:|---:|---:|---:|
-| L0.h1 | rmsnorm_int | 31655 | 98 | 1 | row_per_block | 47247 | 109 | 1 | 1.49 |
+| L0.h1 | rmsnorm_int | 33063 | 100 | 1 | row_per_block | 48655 | 111 | 1 | 1.47 |
 | L0.q | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
 | L0.k | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
 | L0.v | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
@@ -43,15 +45,15 @@ Kernels with more than 255 threads are split into several launches (`launches`).
 | L0.p | softmax_lut | 47179 | 125 | 1 | row_per_block | 71047 | 153 | 1 | 1.51 |
 | L0.o | qmatmul | 157961 | 67 | 3 | matmul_tiled | 108935 | 192 | 1 | 0.69 |
 | L0.om.t | transpose | 25751 | 33 | 3 | default | 25751 | 33 | 3 | 1.00 |
-| L0.y | qlinear | 268461 | 63 | 3 | default | 268461 | 63 | 3 | 1.00 |
-| L0.r1 | add_requant | 38816 | 49 | 3 | default | 38816 | 49 | 3 | 1.00 |
-| L0.h2 | rmsnorm_int | 31655 | 98 | 1 | row_per_block | 47247 | 109 | 1 | 1.49 |
+| L0.y | qlinear | 269176 | 64 | 3 | default | 269176 | 64 | 3 | 1.00 |
+| L0.r1 | add_requant | 40571 | 51 | 3 | default | 40571 | 51 | 3 | 1.00 |
+| L0.h2 | rmsnorm_int | 33063 | 100 | 1 | row_per_block | 48655 | 111 | 1 | 1.47 |
 | L0.gate | qlinear | 538345 | 64 | 5 | matmul_tiled | 420325 | 199 | 2 | 0.78 |
 | L0.up | qlinear | 538345 | 64 | 5 | matmul_tiled | 420325 | 199 | 2 | 0.78 |
 | L0.act | lut_mul | 82565 | 52 | 5 | default | 82565 | 52 | 5 | 1.00 |
-| L0.down | qlinear | 495896 | 64 | 3 | matmul_tiled | 384423 | 191 | 1 | 0.78 |
-| L0.out | add_requant | 38816 | 49 | 3 | default | 38816 | 49 | 3 | 1.00 |
-| L1.h1 | rmsnorm_int | 31655 | 98 | 1 | row_per_block | 47247 | 109 | 1 | 1.49 |
+| L0.down | qlinear | 495896 | 64 | 3 | matmul_tiled | 384247 | 190 | 1 | 0.77 |
+| L0.out | add_requant | 39531 | 50 | 3 | default | 39531 | 50 | 3 | 1.00 |
+| L1.h1 | rmsnorm_int | 33063 | 100 | 1 | row_per_block | 48655 | 111 | 1 | 1.47 |
 | L1.q | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
 | L1.k | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
 | L1.v | qlinear | 268461 | 63 | 3 | matmul_tiled | 200823 | 190 | 1 | 0.75 |
@@ -63,15 +65,15 @@ Kernels with more than 255 threads are split into several launches (`launches`).
 | L1.p | softmax_lut | 47179 | 125 | 1 | row_per_block | 71047 | 153 | 1 | 1.51 |
 | L1.o | qmatmul | 157961 | 67 | 3 | matmul_tiled | 108935 | 192 | 1 | 0.69 |
 | L1.om.t | transpose | 25751 | 33 | 3 | default | 25751 | 33 | 3 | 1.00 |
-| L1.y | qlinear | 268461 | 63 | 3 | default | 268461 | 63 | 3 | 1.00 |
-| L1.r1 | add_requant | 38816 | 49 | 3 | default | 38816 | 49 | 3 | 1.00 |
-| L1.h2 | rmsnorm_int | 31655 | 98 | 1 | row_per_block | 47247 | 109 | 1 | 1.49 |
+| L1.y | qlinear | 269176 | 64 | 3 | default | 269176 | 64 | 3 | 1.00 |
+| L1.r1 | add_requant | 39531 | 50 | 3 | default | 39531 | 50 | 3 | 1.00 |
+| L1.h2 | rmsnorm_int | 33063 | 100 | 1 | row_per_block | 48655 | 111 | 1 | 1.47 |
 | L1.gate | qlinear | 538345 | 64 | 5 | matmul_tiled | 420325 | 199 | 2 | 0.78 |
 | L1.up | qlinear | 538345 | 64 | 5 | matmul_tiled | 420325 | 199 | 2 | 0.78 |
 | L1.act | lut_mul | 82565 | 52 | 5 | default | 82565 | 52 | 5 | 1.00 |
-| L1.down | qlinear | 495896 | 64 | 3 | matmul_tiled | 384423 | 191 | 1 | 0.78 |
-| L1.out | add_requant | 38816 | 49 | 3 | default | 38816 | 49 | 3 | 1.00 |
-| **total** | | **6721506** | | **120** | | **5534652** | | **84** | **0.82** |
+| L1.down | qlinear | 495896 | 64 | 3 | matmul_tiled | 384247 | 190 | 1 | 0.77 |
+| L1.out | add_requant | 39531 | 50 | 3 | default | 39531 | 50 | 3 | 1.00 |
+| **total** | | **6732468** | | **120** | | **5545262** | | **84** | **0.82** |
 
 Tiled-preset kernels that fall back to the default schedule: `L0.y`, `L1.y` (the tiled matmul cannot index
 through the merge-heads reshape view: "index ... is not linear in the loops it ranges over").
@@ -81,8 +83,8 @@ through the merge-heads reshape view: "index ... is not linear in the loops it r
 | program words | default | tiled |
 |---|---:|---:|
 | 0-31 | 0 | 0 |
-| 32-63 | 24 | 18 |
-| 64-95 | 10 | 0 |
+| 32-63 | 22 | 16 |
+| 64-95 | 12 | 2 |
 | 96-127 | 6 | 4 |
 | 128-159 | 0 | 2 |
 | 160-191 | 0 | 8 |
@@ -96,5 +98,5 @@ assembly and read-back.
 
 | preset | compile (s) | isasim (s / input) | Verilator (s / input) | iverilog (s, 1 input) |
 |---|---:|---:|---:|---:|
-| default | 0.8 | 1.94 | 2.12 | 942 |
-| tiled | 1.2 | 1.54 | 1.78 | 765 |
+| default | 0.8 | 1.94 | 2.17 | 942 |
+| tiled | 1.2 | 1.57 | 1.81 | 765 |

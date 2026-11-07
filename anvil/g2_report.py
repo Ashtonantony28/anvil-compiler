@@ -4,7 +4,8 @@
     NANOGPT_DIR=... PYTHONPATH=sim python3 -m anvil.g2_report [--rtl]    # rewrites docs/g2-report.md
 
 Every run is checked: output bit-exact with the batched graph interpreter, within the model contract's TOL vs the
-PyTorch module on dequant(x_q), and (isasim) no divergence / race flags. Cycles are Verilator's (cycle-exact with
+PyTorch module on dequant(x_q), every readable segment within the contract's per-input gain/RMS bounds
+(INPUT_SEGMENTS, A2-M1), and (isasim) no divergence / race flags. Cycles are Verilator's (cycle-exact with
 iverilog, ADR-001). `--rtl` also runs one input per preset on iverilog and records its wall time; without it the
 iverilog wall times of the previous report are kept.
 """
@@ -33,8 +34,8 @@ def params():
 
 
 def inputs(n=N_INPUTS):
-    """Held-out inputs spanning the contract's domain: x_i = sigma_i * z_i, sigma_i evenly over TOL_SIGMA."""
-    sig = np.linspace(*M.TOL_SIGMA, n)
+    """Held-out inputs spanning the contract's domain: x_i = sigma_i * z_i, sigma_i log-evenly over TOL_SIGMA."""
+    sig = np.geomspace(*M.TOL_SIGMA, n)
     return M.heldout_inputs(n) * sig[:, None, None]
 
 
@@ -50,20 +51,30 @@ def compile_model(q, preset):
 
 
 class References:
-    """Graph-interpreter ints (every segment) and PyTorch float output for a batch of float inputs."""
+    """Graph-interpreter ints (every segment), float references of every segment (the captured graph) and the
+    PyTorch float output for a batch of float inputs."""
 
     def __init__(self, torch_model, q, xs):
         import torch
 
         from .interp import graph as gi
-        self.xq = np.clip(np.rint(xs / q.scales["x"]), -128, 127).astype(np.int64)
+        self.q = q
+        self.xq = M.quantize_x(q, xs)
         self.graph = gi.run(q.module, {"x": self.xq}, q.consts, batch=True).values
+        self.float = q.reference(self.xq * q.scales["x"])
         with torch.no_grad():
             self.torch = torch_model(torch.tensor(self.xq * q.scales["x"], dtype=torch.float64)).numpy()
-        self.scale = q.scales[M.OUT]
+        self.scale = M.OUT_UNIT                  # the contract's error unit (model.measure)
 
     def err_lsb(self, i, out_float):
         return float(np.abs(out_float - self.torch[i]).max() / self.scale)
+
+    def segment_errors(self, i, ints) -> dict:
+        """Per-input contract violations (INPUT_SEGMENTS) of the readable segments of compiled run i."""
+        keys = [k for k in M.SEGMENTS if k in ints]
+        stats = M.input_segment_stats(self.q, {k: np.asarray(ints[k])[None] for k in keys},
+                                      {k: self.float[k][i:i + 1] for k in keys}, keys)
+        return M.input_segment_errors(stats)
 
 
 def check(cm, refs: References, i, backend, *, keep="outputs"):
@@ -77,6 +88,10 @@ def check(cm, refs: References, i, backend, *, keep="outputs"):
             raise AssertionError(f"{backend} input {i}: {s} differs from the graph interpreter")
     if M.OUT not in r.ints:
         raise AssertionError(f"{backend}: output {M.OUT} not readable")
+    stray = r.stray_writes()
+    if stray:                                                    # whole memory, not only the read-back values
+        raise AssertionError(f"{backend} input {i}: {len(stray)} words outside the plan's buffers or in consts "
+                             f"changed, e.g. {stray[:4]}")
     flags = r.result.flags or {}
     bad = {k: v for k, v in flags.items() if v}
     if bad:
@@ -84,6 +99,9 @@ def check(cm, refs: References, i, backend, *, keep="outputs"):
     err = refs.err_lsb(i, r.output)
     if err > M.TOL_LSB:
         raise AssertionError(f"{backend} input {i}: error {err:.3f} LSB > TOL {M.TOL_LSB}")
+    seg = refs.segment_errors(i, r.ints)
+    if seg:
+        raise AssertionError(f"{backend} input {i}: per-segment gain/RMS outside the contract: {seg}")
     return r, err, wall
 
 
@@ -219,11 +237,13 @@ by `anvil.frontend`, compiled by `anvil.compile` with the `default` and `tiled` 
 `GpuParams(DATA_MEM_ADDR_BITS=16)` (otherwise gpu.sv's defaults: 2 cores, 4 threads per block, one warp per core,
 no caches, no coalescing). No hand-written assembly.
 
-Checks ({n} held-out inputs `x = sigma * z`, z from `HELDOUT_SEED`, sigma evenly over [0.5, 3], per preset): the
-output `{M.OUT}` (and every other readable value) is bit-exact with the batched graph interpreter on isasim and on
-Verilator for all {n}, and on iverilog for input 0; isasim raises no divergence / store-race / store-conflict flag;
-Verilator's per-kernel cycles are identical for every input and equal iverilog's. Max error vs the PyTorch module
-on `dequant(x_q)`: default {errs['default']:.3f}, tiled {errs['tiled']:.3f} output LSB (TOL = {M.TOL_LSB}).
+Checks ({n} held-out inputs `x = sigma * z`, z from `HELDOUT_SEED`, sigma log-evenly over {list(M.TOL_SIGMA)},
+per preset): the output `{M.OUT}` (and every other readable value) is bit-exact with the batched graph interpreter
+on isasim and on Verilator for all {n}, and on iverilog for input 0; every readable segment's per-input gain and
+RMS error are within the contract's `INPUT_SEGMENTS` bounds (A2-M1); isasim raises no divergence / store-race /
+store-conflict flag; Verilator's per-kernel cycles are identical for every input and equal iverilog's. Max error
+vs the PyTorch module on `dequant(x_q)`: default {errs['default']:.3f}, tiled {errs['tiled']:.3f} `OUT_UNIT`
+(TOL = {M.TOL_LSB}; contract v2, ADR-004: i16 residual stream, sigma-range calibration).
 
 ## Summary
 

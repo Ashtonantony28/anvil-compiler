@@ -176,7 +176,7 @@ def _f(x, d=3):
     return "n/a" if x is None or (isinstance(x, float) and math.isnan(x)) else f"{x:.{d}f}"
 
 
-def svg(curves, path=SVG):
+def svg(curves, path=None):
     W, H, L, B, T, R = 640, 360, 60, 40, 20, 150
     ymax = 1.6
     n = len(next(iter(curves.values())))
@@ -186,6 +186,7 @@ def svg(curves, path=SVG):
 
     def Y(v):
         return T + (H - T - B) * (1 - (min(v, ymax) - 1) / (ymax - 1))
+    path = SVG if path is None else path
     colors = {"random": "#888888", "tier1": "#1f77b4", "tier2": "#d62728", "tier2_static": "#2ca02c"}
     parts = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" font-family="sans-serif" '
              f'font-size="11"><rect width="100%" height="100%" fill="white"/>']
@@ -213,6 +214,7 @@ def render(ds, ev, fails, bad_prog, tun, onl, sizes):
       "(regenerate it with `python3 -m anvil.cost.dataset`). Do not edit by hand.\n")
     nk = len(ds.kernels)
     ntk = sum(ds.is_test_kernel(k) for k in ds.kernels)
+    w(headline(ds, ev, tun))
     w("## Dataset\n")
     w(f"- {len(ds.programs)} distinct programs of {nk} kernels ({ntk} held out), {len(ds.rows)} program x config rows "
       f"measured on Verilator ({sum(r['cycles'] is not None for r in ds.rows)} succeeded), {len(ds.configs)} "
@@ -224,8 +226,16 @@ def render(ds, ev, fails, bad_prog, tun, onl, sizes):
     w("- Kernels by group (total / held out): " + ", ".join(f"{g} {a}/{b}" for g, (a, b) in sorted(groups.items())))
     w(f"- Files: " + ", ".join(f"`{n}` {s / 1e6:.2f} MB" for n, s in sizes.items()))
     w("- Every program is verified like a tuner candidate (isasim bit-exact vs the tensor interpreter, no "
-      "divergence/race/store-conflict flags) and every Verilator run's memory equals isasim's below the scratch "
-      f"area. Programs failing verification: {len(bad_prog)}.\n")
+      "divergence/race/store-conflict flags, no word outside its outputs changed) and every Verilator run's memory "
+      f"equals isasim's on every word of the job, scratch included. Programs failing verification: {len(bad_prog)}.")
+    dd = ds.split.get("dedupe")
+    if dd:
+        w(f"- Split deduplicated (AUDIT-A2 M3): {len(dd['reassigned'])} held-out kernels with the same op and shapes "
+          "as a training kernel were reassigned to train (" + ", ".join(f"{k} = {v}" for k, v in
+                                                               dd["reassigned"].items()) +
+          f"), and {dd['dropped_programs']} held-out programs whose feature vector equals a training program's were "
+          "dropped (" + ", ".join(f"{k} {n}" for k, n in dd["dropped_by_kernel"].items()) + ").")
+    w("")
     w("| config | params | mem_latency | split | rows | failed |")
     w("|---|---|---|---|---|---|")
     for cid, c in ds.configs.items():
@@ -326,9 +336,8 @@ def render(ds, ev, fails, bad_prog, tun, onl, sizes):
       "L1-D and the warp scheduler; it has no fitted parameter. `tier1_closed` is its contention-free closed form.")
     w("- Tier 2 learns log(cycles / prior) with LightGBM; `tier2` uses the event model as prior and feature, "
       "`tier2_static` only the closed form (no event-level evaluation).")
-    w("- Cost of a prediction: tier 1 runs a functional profile plus the event model in Python, comparable in wall "
-      "time to a Verilator run for the largest kernels (see `t_model` / `t_sim` in rows.jsonl.gz); the G4 metric "
-      "counts timing-backend measurements.")
+    w("- Cost of a prediction (rows.jsonl.gz): `t_model` = functional profile + closed form (what tier2_static "
+      "needs), `t_tier1` = the event model on top, `t_sim` = the Verilator run; totals in the headline.")
     w("- Because tier 1 is (almost) cycle-exact, tier 2's residual target is ~0 and its trees are nearly empty; "
       "tier 2 only adds value over tier 1 where the event model is wrong (SIMT_STACK=1, MEDIC, future RTL changes). "
       "`tier2_static` shows what the learned model achieves without the event model.")
@@ -336,6 +345,43 @@ def render(ds, ev, fails, bad_prog, tun, onl, sizes):
       "needs E < 10 cannot meet 10 % on its own (e.g. pools with N = 8-12 candidates at the W=2/W=4 configs); the "
       "G4 ratio sums over pools. The pools are random samples of the sketch spaces, as random search would draw.")
     w("- Rows that timed out on Verilator (2M cycles) are failures, listed per config above, and excluded from tau.")
+    return "\n".join(L) + "\n"
+
+
+def costs(ds):
+    """Aggregate wall time of predictions vs measurements over the measured rows (seconds)."""
+    rows = ds.ok_rows()
+    return {k: float(sum(r.get(k, 0.0) for r in rows)) for k in ("t_model", "t_tier1", "t_sim")}
+
+
+def headline(ds, ev, tun) -> str:
+    """The G4 result as stated after audit A: on tier2_static (no event model), which is cheaper than measuring;
+    tier 1 is an RTL replay as slow as Verilator and is reported for reference only (AUDIT-A2 M2)."""
+    h = ev["heldout"]["tiers"]["tier2_static"]
+    taus = h["tau"]
+    pooled = [d["pooled"] for d in taus.values()]
+    wmin = {c: d["within_min"] for c, d in taus.items()}
+    s = tun["summary"]["tier2_static"]
+    c = costs(ds)
+    t_ok = min(pooled) >= TAU_TARGET
+    w_ok = min(wmin.values()) >= TAU_TARGET
+    r_ok = s["ratio"] <= RATIO_TARGET
+    worst = min(wmin, key=wmin.get)
+    L = ["## Headline (G4, stated on tier2_static)\n",
+         f"- Kendall tau pooled over held-out kernels x held-out configs: {_f(min(pooled))} - {_f(max(pooled))} "
+         f"(target >= {TAU_TARGET}: {'met' if t_ok else 'MISSED'}).",
+         f"- Within-kernel tau (the ranking the tuner consumes), worst kernel per config: "
+         + ", ".join(f"{k} {_f(v)}" for k, v in sorted(wmin.items()))
+         + f" (target >= {TAU_TARGET}: {'met' if w_ok else f'MISSED at {worst}'}).",
+         f"- MAPE {100 * h['mape']:.2f} %. Model-guided tuning needs {s['total']:.1f} measurements vs random search's "
+         f"expected {tun['summary']['random_expected_total']:.1f}: ratio {s['ratio']:.3f} (target <= "
+         f"{RATIO_TARGET:.0%}: {'met' if r_ok else 'MISSED'}).",
+         f"- Cost: tier2_static's inputs (profile + closed form) took {c['t_model']:.0f} s over the dataset vs "
+         f"{c['t_sim']:.0f} s of Verilator runs ({c['t_model'] / max(c['t_sim'], 1e-9):.2f}x). Tier 1's event model "
+         f"took {c['t_tier1']:.0f} s on top ({(c['t_model'] + c['t_tier1']) / max(c['t_sim'], 1e-9):.2f}x Verilator): "
+         "its tau = 1 comes from replaying the RTL state machines and saves timing-backend runs, not time, so it is "
+         "reported below for reference and does not carry G4.",
+         ""]
     return "\n".join(L) + "\n"
 
 
@@ -358,7 +404,7 @@ def main(argv=None):
     slim = {"heldout": {t: {c: {k: v for k, v in d.items() if k != "per_kernel"} for c, d in e["tau"].items()}
                         for t, e in ev["heldout"]["tiers"].items()},
             "mape": {t: e["mape"] for t, e in ev["heldout"]["tiers"].items()},
-            "tuning": tun["summary"], "online": onl}
+            "tuning": tun["summary"], "online": onl, "costs": costs(ds), "dedupe": ds.split.get("dedupe")}
     METRICS.write_text(json.dumps(slim, indent=1, sort_keys=True, default=float) + "\n")
     print(f"wrote {REPORT}")
     s = tun["summary"]

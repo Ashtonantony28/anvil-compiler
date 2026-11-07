@@ -14,49 +14,49 @@ segment. `default` / `tiled` are the driver's presets; hand chains are the xf ke
 Knobs: `U` unrolls innermost sequential loops up to that factor, `ca` is codegen `const_args` (None: constants
 built inline; c: constants of >= c instructions read from the args block).
 
-Total wall time 7.2 min on 4 workers (tuning, every chain and the hand chains on Verilator).
+Total wall time 12.7 min on 4 workers (tuning, every chain and the hand chains on Verilator).
 
 ## Chain totals (cycles)
 
 | workload | config | hand naive | hand tiled | default | tiled | **tuned** | tuned / hand tiled | candidates measured | tuning wall s |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| mlp_block | default | 47610 | 40329 | 44422 | 35084 | **24720** | 0.61 | 1200 | 41 |
-| attention | default | 44163 | 39498 | 38974 | 31668 | **22549** | 0.57 | 1800 | 53 |
-| mm1x8x8 | default | 1324 | 3848 | 1379 | 1379 | **1148** | 0.30 | 200 | 5 |
-| mlp_block | COALESCE=1 | 47610 | 40329 | 44422 | 35084 | **24720** | 0.61 | 1200 | 43 |
-| attention | COALESCE=1 | 44163 | 39498 | 38974 | 31668 | **22333** | 0.57 | 1800 | 61 |
-| mm1x8x8 | COALESCE=1 | 1324 | 3848 | 1379 | 1379 | **1148** | 0.30 | 200 | 5 |
-| mlp_block | DCACHE_LINES=16 | 48825 | 40846 | 45644 | 35616 | **25377** | 0.62 | 1200 | 43 |
-| attention | DCACHE_LINES=16 | 45272 | 39901 | 40066 | 32066 | **22897** | 0.57 | 1800 | 62 |
-| mm1x8x8 | DCACHE_LINES=16 | 1370 | 3899 | 1425 | 1425 | **1194** | 0.31 | 200 | 5 |
-| mlp_block | COALESCE=1 DCACHE_LINES=16 | 48825 | 40846 | 45644 | 35616 | **25377** | 0.62 | 1200 | 44 |
-| attention | COALESCE=1 DCACHE_LINES=16 | 45272 | 39901 | 40066 | 32066 | **22897** | 0.57 | 1800 | 63 |
-| mm1x8x8 | COALESCE=1 DCACHE_LINES=16 | 1370 | 3899 | 1425 | 1425 | **1194** | 0.31 | 200 | 5 |
+| mlp_block | default | 47610 | 40329 | 44422 | 35084 | **24720** | 0.61 | 1200 | 45 |
+| attention | default | 44163 | 39498 | 38974 | 31668 | **22549** | 0.57 | 1800 | 85 |
+| mm1x8x8 | default | 1324 | 3848 | 1379 | 1379 | **1148** | 0.30 | 200 | 8 |
+| mlp_block | COALESCE=1 | 47610 | 40329 | 44422 | 35084 | **24720** | 0.61 | 1200 | 82 |
+| attention | COALESCE=1 | 44163 | 39498 | 38974 | 31668 | **22333** | 0.57 | 1800 | 142 |
+| mm1x8x8 | COALESCE=1 | 1324 | 3848 | 1379 | 1379 | **1148** | 0.30 | 200 | 7 |
+| mlp_block | DCACHE_LINES=16 | 48825 | 40846 | 45644 | 35616 | **25377** | 0.62 | 1200 | 69 |
+| attention | DCACHE_LINES=16 | 45272 | 39901 | 40066 | 32066 | **22897** | 0.57 | 1800 | 124 |
+| mm1x8x8 | DCACHE_LINES=16 | 1370 | 3899 | 1425 | 1425 | **1194** | 0.31 | 200 | 7 |
+| mlp_block | COALESCE=1 DCACHE_LINES=16 | 48825 | 40846 | 45644 | 35616 | **25377** | 0.62 | 1200 | 69 |
+| attention | COALESCE=1 DCACHE_LINES=16 | 45272 | 39901 | 40066 | 32066 | **22897** | 0.57 | 1800 | 113 |
+| mm1x8x8 | COALESCE=1 DCACHE_LINES=16 | 1370 | 3899 | 1425 | 1425 | **1194** | 0.31 | 200 | 6 |
 
 ## mlp_block, default configuration: per kernel
 
 | kernel | hand naive | hand tiled | default | tiled | **tuned** | tuned schedule | knobs | words | measured (timed) | pruned |
 |---|---:|---:|---:|---:|---:|---|---|---:|---:|---:|
-| h | 7983 | 7983 | 5259 | 6297 | **4848** | rows thread, r=1, 4 lanes, mask | U=4 ca=None | 188 | 200 (69) | 291 |
-| gate | 11855 | 9205 | 11511 | 7627 | **5867** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 247 | 200 (85) | 181 |
-| up | 11855 | 9205 | 11511 | 7627 | **5867** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 247 | 200 (80) | 311 |
-| act | 4431 | 4431 | 4695 | 4695 | **2164** | ew 8/thread strided, 4 lanes, mask | U=16 ca=4 | 179 | 200 (129) | 18 |
+| h | 7983 | 7983 | 5259 | 6297 | **4848** | rows thread, r=1, 4 lanes, mask | U=4 ca=None | 188 | 200 (63) | 353 |
+| gate | 11855 | 9205 | 11511 | 7627 | **5867** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 247 | 200 (84) | 183 |
+| up | 11855 | 9205 | 11511 | 7627 | **5867** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 247 | 200 (78) | 331 |
+| act | 4431 | 4431 | 4695 | 4695 | **2164** | ew 8/thread strided, 4 lanes, mask | U=16 ca=4 | 179 | 200 (125) | 33 |
 | down | 9419 | 7438 | 9247 | 6639 | **4813** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 243 | 200 (64) | 344 |
-| out | 2067 | 2067 | 2199 | 2199 | **1161** | ew 4/thread strided, 4 lanes, mask | U=16 ca=2 | 96 | 200 (105) | 14 |
+| out | 2067 | 2067 | 2199 | 2199 | **1161** | ew 4/thread strided, 4 lanes, mask | U=16 ca=2 | 96 | 200 (104) | 35 |
 
 ## attention, default configuration: per kernel
 
 | kernel | hand naive | hand tiled | default | tiled | **tuned** | tuned schedule | knobs | words | measured (timed) | pruned |
 |---|---:|---:|---:|---:|---:|---|---|---:|---:|---:|
-| h | 7983 | 7983 | 5259 | 6297 | **4848** | rows thread, r=1, 4 lanes, mask | U=4 ca=None | 188 | 200 (69) | - |
+| h | 7983 | 7983 | 5259 | 6297 | **4848** | rows thread, r=1, 4 lanes, mask | U=4 ca=None | 188 | 200 (63) | - |
 | q | 5931 | 4606 | 5715 | 3817 | **2999** | mm 4x1 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 249 | 200 (63) | 259 |
-| k | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (64) | 151 |
-| v | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (72) | 262 |
-| kT | 1371 | 1371 | 1023 | 1023 | **467** | ew 4/thread strided, 4 lanes, mask | U=16 ca=2 | 37 | 200 (77) | 0 |
-| scores | 2969 | 4601 | 2751 | 3735 | **1765** | mm 2x1 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 145 | 200 (81) | 124 |
-| p | 3929 | 3929 | 3174 | 3241 | **2309** | rows block, r=1, 4 lanes, mask | U=16 ca=2 | 98 | 200 (40) | 400 |
-| o | 4187 | 3190 | 3907 | 2104 | **1812** | mm 2x2 reg tile, ij, 4 lanes, k unroll 4 | U=16 ca=2 | 152 | 200 (69) | 146 |
-| y | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (67) | 231 |
+| k | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (61) | 175 |
+| v | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (69) | 285 |
+| kT | 1371 | 1371 | 1023 | 1023 | **467** | ew 4/thread strided, 4 lanes, mask | U=16 ca=2 | 37 | 200 (76) | 1 |
+| scores | 2969 | 4601 | 2751 | 3735 | **1765** | mm 2x1 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 145 | 200 (78) | 132 |
+| p | 3929 | 3929 | 3174 | 3241 | **2309** | rows block, r=1, 4 lanes, mask | U=16 ca=2 | 98 | 200 (27) | 784 |
+| o | 4187 | 3190 | 3907 | 2104 | **1812** | mm 2x2 reg tile, ij, 4 lanes, k unroll 4 | U=16 ca=2 | 152 | 200 (68) | 147 |
+| y | 5931 | 4606 | 5715 | 3817 | **2783** | mm 2x2 reg tile, ij, 4 lanes, k unroll 8 | U=16 ca=2 | 233 | 200 (64) | 255 |
 
 ## mm1x8x8, default configuration: per kernel
 

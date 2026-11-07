@@ -107,6 +107,10 @@ def compiled_chain(cm, block, backend="verilator", index=0):
     r2 = cm.run(fx["inputs"]["x"], backend, quantized=True)          # the reuse plan: same cycles, output only
     if not np.array_equal(r2.ints[OUT[block]], fx["golden"][OUT[block]]):
         raise AssertionError(f"compiled {block} (reuse plan): output differs from the golden")
+    for x in (r, r2):
+        if x.stray_writes():                                         # whole memory (AUDIT-A1 M3)
+            raise AssertionError(f"compiled {block}: words outside the plan's buffers or in consts changed: "
+                                 f"{x.stray_writes()[:4]}")
     if r2.cycles != r.cycles:
         raise AssertionError(f"compiled {block}: cycles depend on the memory plan: {r.cycles} vs {r2.cycles}")
     return r.cycles

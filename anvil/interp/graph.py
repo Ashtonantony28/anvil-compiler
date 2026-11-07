@@ -36,7 +36,7 @@ def _check_type(op, val, lead=()):
     t = g.qt(op.results[0])
     if list(val.shape) != list(lead) + t.dims:
         raise ValueError(f"{op.name} {op.sym_str!r}: shape {list(val.shape)} != declared {t.dims}")
-    (sem.check_i8 if t.dtype == "i8" else sem.check_i32)(val, f"{op.name} {op.sym_str!r}")
+    sem.check_dtype(val, t.dtype, f"{op.name} {op.sym_str!r}")
     return val
 
 
@@ -61,17 +61,18 @@ def run(m, inputs: dict, consts: dict | None = None, *, batch: bool = False) -> 
                 val = np.asarray(consts[op.sym_str], dtype=np.int64)
         elif isinstance(op, (g.QMatmulOp, g.QLinearOp)):
             lut = None if op.lut is None else v(op.lut)
-            val = sem.qmatmul(v(op.a), v(op.b), _i(op.M), _i(op.s), lut)
+            val = sem.qmatmul(v(op.a), v(op.b), _i(op.M), _i(op.s), lut, g.qt(op.result).dtype)
         elif isinstance(op, g.LutOp):
             val = sem.lut_i8(v(op.x), v(op.table))
         elif isinstance(op, g.LutMulOp):
             val = sem.swiglu_lut(v(op.x), v(op.y), v(op.table), _i(op.M), _i(op.s))
         elif isinstance(op, g.RmsNormIntOp):
-            val = sem.rmsnorm_int(v(op.x), v(op.w), v(op.lut), _i(op.M), _i(op.s))
+            val = sem.rmsnorm_wide(v(op.x), v(op.w), v(op.lut), _i(op.M), _i(op.s), op.ss_shift_int,
+                                   op.ss_init_int, g.qt(op.x).dtype)
         elif isinstance(op, g.SoftmaxLutOp):
             val = sem.softmax_lut(v(op.x), v(op.lut), _i(op.one), bool(op.causal.value.data))
         elif isinstance(op, g.AddRequantOp):
-            val = sem.add_requant(v(op.a), v(op.b), _i(op.Ma), _i(op.Mb), _i(op.s))
+            val = sem.add_requant(v(op.a), v(op.b), _i(op.Ma), _i(op.Mb), _i(op.s), g.qt(op.result).dtype)
         elif isinstance(op, g.TransposeOp):
             k = 0 if op.x in is_const else nb
             val = np.transpose(v(op.x), list(range(k)) + [p + k for p in op.perm_list])

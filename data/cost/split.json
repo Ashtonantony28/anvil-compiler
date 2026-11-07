@@ -1,6 +1,5 @@
 {
  "heldout_kernels": [
-  "xf_attention.h",
   "xf_attention.q",
   "xf_attention.k",
   "xf_attention.v",
@@ -9,11 +8,9 @@
   "xf_attention.p",
   "xf_attention.o",
   "xf_attention.y",
-  "model.L0.scores",
   "model.L0.p",
   "model.L0.down",
   "model.L0.kT",
-  "model.L0.r1",
   "syn.qlinear_3x12x8",
   "syn.qlinear_8x4x12",
   "syn.rmsnorm_6x12",
@@ -26,5 +23,18 @@
   "h1",
   "h2",
   "h3"
- ]
+ ],
+ "dedupe": {
+  "reassigned": {
+   "xf_attention.h": "xf_mlp.h",
+   "model.L0.scores": "model.L0.o",
+   "model.L0.r1": "model.L0.out"
+  },
+  "dropped_programs": 41,
+  "dropped_by_kernel": {
+   "xf_attention.kT": 14,
+   "xf_attention.o": 13,
+   "xf_attention.scores": 14
+  }
+ }
 }

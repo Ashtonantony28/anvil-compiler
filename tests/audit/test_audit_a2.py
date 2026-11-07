@@ -62,8 +62,6 @@ def _target():
 # ------------------------------------------------------------------------------------------------ A: numerics
 
 @pytest.mark.torch
-@pytest.mark.xfail(strict=True, reason="A2-H1: below sigma = 0.5 the end-to-end error exceeds TOL even when the "
-                   "model is calibrated on inputs of the same scale (nanoGPT's own embedding init is sigma = 0.02)")
 def test_h1_tolerance_holds_for_small_inputs_with_matched_calibration():
     from anvil import model as M
     m, _ = _target()
@@ -74,9 +72,6 @@ def test_h1_tolerance_holds_for_small_inputs_with_matched_calibration():
 
 
 @pytest.mark.torch
-@pytest.mark.xfail(strict=True, reason="A2-M1: the compiled-model acceptance (G2 check: bit-exact vs the graph "
-                   "interpreter + TOL) passes a 3 % output gain error; per-segment gain checks only run on the graph "
-                   "interpreter in tests/model")
 def test_m1_compiled_acceptance_catches_a_3pct_output_gain_error():
     from anvil import g2_report as R
     from anvil import model as M
@@ -102,17 +97,20 @@ def test_m1_compiled_acceptance_catches_a_3pct_output_gain_error():
 
 # ------------------------------------------------------------------------------------------------ B: performance
 
-@pytest.mark.xfail(strict=True, reason="A2-M2: tier 1 (the cost model behind 'G4 met', tau = 1.000) is slower than "
-                   "the Verilator run it replaces (t_model / t_sim = 1.22 over the dataset, profile time excluded)")
-def test_m2_tier1_prediction_is_cheaper_than_the_measurement_it_replaces():
+def test_m2_headline_cost_model_is_cheaper_than_the_measurement_it_replaces():
+    """A2-M2: G4 rested on tier 1, an RTL replay that costs more wall time than the Verilator run it replaces.
+    Fixed by stating G4 on tier2_static (docs/g4-report.md headline); its inputs (functional profile + closed form,
+    the rows' `t_model`) must cost well under the measurement, and tier 1's own time (`t_tier1`) is reported
+    separately rather than hidden."""
     rows = [json.loads(line) for line in gzip.open(DATA / "rows.jsonl.gz", "rt")]
     t_model = sum(r["t_model"] for r in rows)
     t_sim = sum(r["t_sim"] for r in rows)
-    assert t_model <= 0.5 * t_sim, f"tier-1 wall {t_model:.0f} s vs Verilator {t_sim:.0f} s"
+    assert all("t_tier1" in r for r in rows)
+    assert t_model <= 0.5 * t_sim, f"headline-model wall {t_model:.0f} s vs Verilator {t_sim:.0f} s"
+    report = (ROOT / "docs" / "g4-report.md").read_text()
+    assert "## Headline (G4, stated on tier2_static)" in report
 
 
-@pytest.mark.xfail(strict=True, reason="A2-M3: held-out-kernel programs whose whole feature vector equals a "
-                   "training-kernel program's (xf_attention.h = xf_mlp.h: 64 of 127; 121 of 2,221 overall)")
 def test_m3_heldout_kernels_have_no_feature_identical_twin_in_train():
     kern = json.loads((DATA / "kernels.json").read_text())
     progs = [json.loads(line) for line in gzip.open(DATA / "programs.jsonl.gz", "rt")]
@@ -128,8 +126,6 @@ def test_m3_heldout_kernels_have_no_feature_identical_twin_in_train():
 
 # ------------------------------------------------------------------------------------------------ C: API
 
-@pytest.mark.xfail(strict=True, reason="A2-M4: anvil.compile on graph IR skips prove_no_overflow; an overflowing "
-                   "graph compiles and silently wraps on the GPU (the graph interpreter raises OverflowError)")
 def test_m4_compile_of_graph_ir_proves_no_overflow():
     import anvil
     mod, consts, _ = _fixture_graph()
@@ -138,8 +134,6 @@ def test_m4_compile_of_graph_ir_proves_no_overflow():
         anvil.compile((mod, consts))
 
 
-@pytest.mark.xfail(strict=True, reason="A2-M5: run(..., quantized=True) accepts values outside int8 (and floats, "
-                   "truncated) and returns wrong outputs without an error; the graph interpreter rejects them")
 def test_m5_run_rejects_out_of_range_integer_inputs():
     import anvil
     mod, consts, fx = _fixture_graph()
@@ -149,8 +143,6 @@ def test_m5_run_rejects_out_of_range_integer_inputs():
         cm.run(x, quantized=True)
 
 
-@pytest.mark.xfail(strict=True, reason="A2-M6: anvil.compile(graph_module) without consts compiles and runs on "
-                   "unset weight memory without an error")
 def test_m6_compile_without_consts_is_an_error():
     import anvil
     mod, _, _ = _fixture_graph()
@@ -158,8 +150,6 @@ def test_m6_compile_without_consts_is_an_error():
         anvil.compile(mod)
 
 
-@pytest.mark.xfail(strict=True, reason="A2-M7: unknown keywords are swallowed by **quant_kw on the graph-IR path, "
-                   "so a typo (shedules='tiled') silently compiles the default schedules")
 def test_m7_unknown_keyword_is_an_error():
     import anvil
     mod, consts, _ = _fixture_graph()
@@ -169,9 +159,6 @@ def test_m7_unknown_keyword_is_an_error():
 
 # ------------------------------------------------------------------------------------------- C: clean checkout
 
-@pytest.mark.xfail(strict=True, reason="A2-M8: split(i, 3, mask) then compute_at(stat.i, i.o) on rmsnorm is "
-                   "accepted as legal but reads out of bounds; hypothesis finds it from a clean checkout (no "
-                   ".hypothesis database), so `make check` fails there")
 def test_m8_masked_split_then_compute_at_is_rejected_or_bit_exact():
     import sys
     sys.path.insert(0, str(ROOT / "tests" / "schedule"))

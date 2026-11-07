@@ -14,7 +14,7 @@ import pytest
 
 from anvil.codegen import bench, compile_kernel, kernel_job
 from anvil.runtime import run
-from codegen_util import case, flags_clean, params, schedule, target
+from codegen_util import case, bad_flags, params, schedule, target
 
 pytestmark = pytest.mark.rtl
 
@@ -38,9 +38,10 @@ def test_rtl_equals_isasim(blk, name, tpl, cfg):
     ck = compile_kernel(fin, p)
     plan = kernel_job(ck, {s: v for s, v in bufs.items() if s in ck.buffers})
     model = run(plan.job)
-    assert not flags_clean(model, p.SIMT_STACK)
+    assert not bad_flags(model, p.SIMT_STACK)
     rtl = run(plan.job, "rtl")
     assert rtl.memory[:plan.end] == model.memory[:plan.end]
+    assert not plan.stray_writes(rtl.memory)
     for s in ck.buffers:
         assert np.array_equal(plan.read(rtl.memory, s), np.asarray(want[s])), s
 
@@ -55,7 +56,7 @@ def test_rtl_barriers_with_inactive_lanes_and_warps(wpc, simt):
     ck = compile_kernel(k, p)
     plan = kernel_job(ck, bufs)
     model, rtl = run(plan.job), run(plan.job, "rtl")
-    assert not flags_clean(model, simt)
+    assert not bad_flags(model, simt)
     assert rtl.memory[:plan.end] == model.memory[:plan.end]
     assert np.array_equal(plan.read(rtl.memory, "y"), want["y"])
 

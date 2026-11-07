@@ -526,6 +526,22 @@ def _domain_max(space_, exprs, trips):
     return best
 
 
+def _check_box_in_domain(space_, bx, extents, trips, stage):
+    """compute_at recomputes the whole box per iteration, unguarded: every box must lie inside the stage's
+    iteration domain for every value of the outer ivs. A consumer under a ragged guard (split(..., "mask")) reads
+    a box that runs past the domain on its last iteration; computing it there would read out of bounds (A2-M8)."""
+    outer = space_.outer
+    if any(v not in trips for v in outer) or math.prod(trips[v] for v in outer) > 1 << 16:
+        raise ScheduleError(f"compute_at: cannot prove the region of {stage!r} stays inside its domain")
+    m = AffineMap(len(outer), 0, tuple(u.rest_expr(r, lo) for r, lo, _ in bx))
+    for pt in itertools.product(*[range(trips[v]) for v in outer]):
+        for base, (_, _, e), n in zip(m.eval(list(pt), []), bx, extents):
+            if base < 0 or base + e > n:
+                raise ScheduleError(f"compute_at: the region of {stage!r} one iteration reads ([{base}, {base + e}) "
+                                    f"of [0, {n})) leaves the stage's domain (a guarded/ragged consumer); split "
+                                    f"with tail='pad' or compute at another loop")
+
+
 def _trips(f):
     return {op.iv: u.extent(op) for op in u.loops(f)}
 
@@ -660,6 +676,7 @@ def compute_at(k, tgt, stage, at):
     sp = u.Space()
     bx = u.box(sp, loads, inner, trips)
     ext = [e for _, _, e in bx]
+    _check_box_in_domain(sp, bx, [u.extent(c) for c in chain], trips, stage)
     for c in chain:
         k.kinds.pop(u.tag_of(c), None)
     # build: reg temps, then loops over the box dims of extent > 1 (reusing the chain's tags)

@@ -38,7 +38,8 @@ def schedule(kernel, tpl, tgt):
     return T.TEMPLATES[tpl](s) if tpl != "none" else s
 
 
-def flags_clean(r, simt):
+def bad_flags(r, simt):
+    """The isasim flags that must be empty (C4 level 4): races, store conflicts, divergence at SIMT_STACK=0."""
     bad = {k: r.flags[k] for k in ("store_races", "stores_conflict") if r.flags[k]}
     if not simt and r.flags["divergent"]:
         bad["divergent"] = r.flags["divergent"]
@@ -74,8 +75,10 @@ def check_kernel(fin, bufs, p, *, predication="auto", mir_level=False, backend="
     plan = kernel_job(ck, vals)
     r = run(plan.job, backend)
     if backend == "isasim":
-        bad = flags_clean(r, p.SIMT_STACK)
+        bad = bad_flags(r, p.SIMT_STACK)
         assert not bad, bad
+    stray = plan.stray_writes(r.memory)
+    assert not stray, f"words outside every buffer changed: {stray[:8]}"
     for s in ck.buffers:
         got = plan.read(r.memory, s)
         assert np.array_equal(got, np.asarray(want[s]).reshape(got.shape)), (s, got, want[s])

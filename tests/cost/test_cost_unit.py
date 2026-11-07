@@ -90,7 +90,10 @@ def test_features_deterministic():
 def test_split_is_frozen():
     """The committed split equals the module's constants, and held-out configs/kernels never reach training."""
     split = json.loads((DATA / "split.json").read_text())
-    assert split == {"heldout_kernels": list(HELDOUT_KERNELS), "heldout_configs": list(HELDOUT_CONFIGS)}
+    moved = split["dedupe"]["reassigned"]                       # AUDIT-A2 M3: same op and shapes as a train kernel
+    assert set(moved) <= set(HELDOUT_KERNELS)
+    assert split["heldout_kernels"] == [k for k in HELDOUT_KERNELS if k not in moved]
+    assert split["heldout_configs"] == list(HELDOUT_CONFIGS)
     cfg = json.loads((DATA / "configs.json").read_text())
     assert set(cfg) == set(CONFIGS)
     for cid, c in cfg.items():
@@ -98,7 +101,9 @@ def test_split_is_frozen():
         assert (c["split"] == "test") == (cid in HELDOUT_CONFIGS)
     assert all(len(v) >= 3 for v in classes().values())
     kern = json.loads((DATA / "kernels.json").read_text())
-    assert {k for k, v in kern.items() if v["split"] == "test"} == set(HELDOUT_KERNELS)
+    assert {k for k, v in kern.items() if v["split"] == "test"} == set(split["heldout_kernels"])
+    assert all(kern[k]["split"] == "train" and kern[v]["split"] == "train" and kern[k]["class"] == kern[v]["class"]
+               for k, v in moved.items())
     total = sum(p.stat().st_size for p in DATA.iterdir())
     assert total < 25e6
 

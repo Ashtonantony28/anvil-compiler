@@ -7,15 +7,19 @@ metadata. Requant constants (M, s) are op properties, so the graph is self-descr
     func  {sym_name}                      container, one block
     input {sym}                    -> t   graph input
     const {sym[, value]}           -> t   weight / LUT / any constant tensor
-    qmatmul (a, b[, lut]) {M, s}   -> i8  requant(a @ b, M, s), optional fused lut[. + 128] epilogue;
+    qmatmul (a, b[, lut]) {M, s}   -> i8  requant(a @ b, M, s), optional fused lut[. + 128] epilogue; an i16
+                                          result (no LUT) clamps there instead (residual branch, ADR-004);
                                           a (..., M, K) @ b (K, N), or head-batched b (..., K, N) with the
                                           same leading dims as a (ADR-003: one op over every head)
     qlinear (x, w[, lut]) {M, s}   -> i8  qmatmul whose w is a const (x @ W, W is (in, out))
     lut     (x, table)             -> i8  table[x + 128], 256 int8 entries
     lut_mul (x, y, table) {M, s}   -> i8  requant(table[x + 128] * y, M, s)          (SwiGLU)
-    rmsnorm_int (x, w, lut) {M, s} -> i8  golden.rmsnorm_int over the last axis
+    rmsnorm_int (x, w, lut) {M, s[, ss_shift, ss_init]} -> i8  golden.rmsnorm_int over the last axis; x may
+                                          be i16 (wide residual, ADR-004): the row sum starts at ss_init and adds
+                                          (x^2 + 2^(c-1)) >> c, c = ss_shift (both absent = 0)
     softmax_lut (x, lut) {one, causal} -> golden.softmax_lut over the last axis
-    add_requant (a, b) {Ma, Mb, s} -> i8  clamp((a*Ma + b*Mb + 2^(s-1)) >> s)         (residual)
+    add_requant (a, b) {Ma, Mb, s} -> i8|i16  clamp((a*Ma + b*Mb + 2^(s-1)) >> s) to the result dtype
+                                          (residual; a, b i8 or i16)
     transpose (x) {perm}, reshape (x)     layout ops
     output (values...)                    graph results
 """
@@ -56,7 +60,8 @@ from xdsl.printer import Printer
 from xdsl.traits import NoTerminator
 from xdsl.utils.exceptions import VerifyException
 
-DTYPES = {"i8": 8, "i32": 32}
+DTYPES = {"i8": 8, "i16": 16, "i32": 32}
+WIDE = ("i8", "i16")                       # residual-stream dtypes (ADR-004)
 
 
 @irdl_attr_definition
@@ -86,8 +91,8 @@ class QTensorType(ParametrizedAttribute, TypeAttribute):
         return None if isinstance(self.scale, NoneAttr) else self.scale.value.data
 
     def verify(self):
-        if self.elem.width.data not in (8, 32):
-            raise VerifyException(f"qtensor dtype must be i8 or i32, got {self.elem}")
+        if self.elem.width.data not in (8, 16, 32):
+            raise VerifyException(f"qtensor dtype must be i8, i16 or i32, got {self.elem}")
         if any(d < 1 for d in self.dims):
             raise VerifyException(f"qtensor dims must be positive, got {self.dims}")
 
@@ -183,7 +188,8 @@ class _MatmulBase(_GraphOp):
 
     def verify_(self):
         a, b, r = qt(self.a), qt(self.b), qt(self.result)
-        _expect(self, a.dtype == b.dtype == r.dtype == "i8", "operands and result must be i8")
+        _expect(self, a.dtype == b.dtype == "i8" and r.dtype in WIDE, "operands must be i8, the result i8 or i16")
+        _expect(self, r.dtype == "i8" or self.lut is None, "a LUT epilogue needs an i8 result")
         _expect(self, len(a.dims) >= 2 and (len(b.dims) == 2 or (len(b.dims) == len(a.dims) and
                                                                  b.dims[:-2] == a.dims[:-2])),
                 f"shapes {a.dims} @ {b.dims}: need (..., M, K) @ (K, N) or (..., M, K) @ (..., K, N)")
@@ -248,11 +254,23 @@ class RmsNormIntOp(_GraphOp):
     lut = operand_def(QTensorType)
     M = prop_def(IntegerAttr)
     s = prop_def(IntegerAttr)
+    ss_shift = opt_prop_def(IntegerAttr)
+    ss_init = opt_prop_def(IntegerAttr)
     result = result_def(QTensorType)
+
+    @property
+    def ss_shift_int(self) -> int:
+        return 0 if self.ss_shift is None else _int(self.ss_shift)
+
+    @property
+    def ss_init_int(self) -> int:
+        return 0 if self.ss_init is None else _int(self.ss_init)
 
     def verify_(self):
         x, w, lut, r = qt(self.x), qt(self.w), qt(self.lut), qt(self.result)
-        _expect(self, x.dtype == w.dtype == r.dtype == "i8", "x, w and result must be i8")
+        _expect(self, w.dtype == r.dtype == "i8" and x.dtype in WIDE, "x must be i8 or i16, w and result i8")
+        _expect(self, 0 <= self.ss_shift_int <= 30, f"ss_shift={self.ss_shift_int} outside [0, 30]")
+        _expect(self, 0 <= self.ss_init_int < 1 << 31, f"ss_init={self.ss_init_int} outside int32")
         _expect(self, w.dims == x.dims[-1:], f"weight {w.dims} != [{x.dims[-1]}]")
         _expect(self, len(lut.dims) == 1 and lut.dtype == "i32", "rsqrt LUT must be 1-D i32")
         _expect(self, r.dims == x.dims, "shape changes")
@@ -289,7 +307,7 @@ class AddRequantOp(_GraphOp):
 
     def verify_(self):
         a, b, r = qt(self.a), qt(self.b), qt(self.result)
-        _expect(self, a.dtype == b.dtype == r.dtype == "i8", "operands and result must be i8")
+        _expect(self, {a.dtype, b.dtype, r.dtype} <= set(WIDE), "operands and result must be i8 or i16")
         _expect(self, a.dims == b.dims == r.dims, f"shapes {a.dims} + {b.dims} -> {r.dims}")
         _check_shift(self, "s")
 
@@ -375,17 +393,17 @@ class GraphBuilder:
         return self._add(ConstOp(properties=self._props(sym, value=dense),
                                  result_types=[QTensorType(shape, dtype, scale)]))
 
-    def _mm(self, cls, sym, a, b, m, s, scale, lut):
+    def _mm(self, cls, sym, a, b, m, s, scale, lut, dtype="i8"):
         out = qt(a).dims[:-1] + [qt(b).dims[-1]]
         return self._add(cls(operands=[a, b, [lut] if lut is not None else []],
                              properties=self._props(sym, M=_iattr(m), s=_iattr(s)),
-                             result_types=[QTensorType(out, "i8", scale)]))
+                             result_types=[QTensorType(out, dtype, scale)]))
 
-    def qmatmul(self, sym, a, b, m, s, scale=None, lut=None):
-        return self._mm(QMatmulOp, sym, a, b, m, s, scale, lut)
+    def qmatmul(self, sym, a, b, m, s, scale=None, lut=None, dtype="i8"):
+        return self._mm(QMatmulOp, sym, a, b, m, s, scale, lut, dtype)
 
-    def qlinear(self, sym, x, w, m, s, scale=None, lut=None):
-        return self._mm(QLinearOp, sym, x, w, m, s, scale, lut)
+    def qlinear(self, sym, x, w, m, s, scale=None, lut=None, dtype="i8"):
+        return self._mm(QLinearOp, sym, x, w, m, s, scale, lut, dtype)
 
     def lut(self, sym, x, table, scale=None):
         return self._add(LutOp(operands=[x, table], properties=self._props(sym),
@@ -395,8 +413,12 @@ class GraphBuilder:
         return self._add(LutMulOp(operands=[x, y, table], properties=self._props(sym, M=_iattr(m), s=_iattr(s)),
                                   result_types=[QTensorType(qt(x).dims, "i8", scale)]))
 
-    def rmsnorm_int(self, sym, x, w, lut, m, s, scale=None):
-        return self._add(RmsNormIntOp(operands=[x, w, lut], properties=self._props(sym, M=_iattr(m), s=_iattr(s)),
+    def rmsnorm_int(self, sym, x, w, lut, m, s, scale=None, ss_shift=0, ss_init=0):
+        sh = _iattr(ss_shift) if ss_shift else None
+        si = _iattr(ss_init) if ss_init else None
+        return self._add(RmsNormIntOp(operands=[x, w, lut],
+                                      properties=self._props(sym, M=_iattr(m), s=_iattr(s), ss_shift=sh,
+                                                             ss_init=si),
                                       result_types=[QTensorType(qt(x).dims, "i8", scale)]))
 
     def softmax_lut(self, sym, x, lut, one, causal=True, scale=None, dtype="i8"):
@@ -404,10 +426,10 @@ class GraphBuilder:
                                       properties=self._props(sym, one=_iattr(one), causal=BoolAttr.from_bool(causal)),
                                       result_types=[QTensorType(qt(x).dims, dtype, scale)]))
 
-    def add_requant(self, sym, a, b, ma, mb, s, scale=None):
+    def add_requant(self, sym, a, b, ma, mb, s, scale=None, dtype="i8"):
         return self._add(AddRequantOp(operands=[a, b],
                                       properties=self._props(sym, Ma=_iattr(ma), Mb=_iattr(mb), s=_iattr(s)),
-                                      result_types=[QTensorType(qt(a).dims, "i8", scale)]))
+                                      result_types=[QTensorType(qt(a).dims, dtype, scale)]))
 
     def transpose(self, sym, x, perm=None, scale=None):
         t = qt(x)
