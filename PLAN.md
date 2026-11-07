@@ -18,8 +18,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | DONE |
 | SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | DONE |
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | DONE |
-| SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | IN PROGRESS |
-| AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
+| SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | DONE |
+| AUD-A | Audit round A (4 lenses) | — | SG5 | IN PROGRESS |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | DONE |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | IN PROGRESS |
 | SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | TODO |
@@ -236,7 +236,12 @@ programs now hit the 256-word limit; committed best schedules are keyed by kerne
 iverilog RTL. Accept (G2): output bit-exact vs the graph interpreter on held-out inputs (isasim and Verilator on ≥ 32
 inputs, iverilog on ≥ 1), within the model contract's TOL vs PyTorch, no race/divergence flags; a report
 `docs/g2-report.md` with per-kernel cycles, total cycles, footprint, launch count, and the program-size histogram.
-Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" tests/g2`
+Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" tests/g2` (add `and not slow` to skip the ~28 min iverilog runs)
+
+Done — **G2 met.** 40 kernels, 120/84 launches, footprint 30,072/29,808 of 65,536 words, no spills, max program 199
+words; bit-exact on isasim and Verilator (32 held-out inputs) and iverilog (1 input); max error 2.3 LSB (TOL 6).
+Cycles: default 6,721,506, tiled 5,534,652 (untuned). `docs/g2-report.md`. Open: L0.y/L1.y can't tile through the
+merge-heads view (non-linear index); `row_per_block` is 1.5× slower than default at d=32; transposes ≈ 300k cycles.
 
 ### SG7 — Cost models (G4)
 `anvil.cost`: tier 1 analytic model from the scheduler FSM timing (fetch with/without I-cache, REQUEST/WAIT/EXECUTE/
