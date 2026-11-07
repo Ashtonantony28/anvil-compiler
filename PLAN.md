@@ -20,11 +20,11 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | DONE |
 | SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | DONE |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | DONE (AUDIT-A1, AUDIT-A2) |
-| SG9 | AUDIT-A2 H1: accuracy for small inputs (σ down to 0.02) | — | AUD-A | IN PROGRESS |
-| SG10 | Audit A mediums: masked-lane loads, clean-checkout schedule bug, WORD_BITS, whole-memory checks, compile API guards | — | AUD-A | IN PROGRESS |
+| SG9 | AUDIT-A2 H1: accuracy for small inputs (σ down to 0.02) | — | AUD-A | DONE |
+| SG10 | Audit A mediums: masked-lane loads, clean-checkout schedule bug, WORD_BITS, whole-memory checks, compile API guards | — | AUD-A | DONE |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | DONE |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | DONE |
-| SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | TODO |
+| SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | IN PROGRESS |
 | AUD-B | Final audit round, then close-out | — | SG8 | TODO |
 
 End point: audit rounds A and B only. Highs from a round become sub-goals; mediums and lows are recorded with
@@ -289,3 +289,24 @@ checks), A2-M4..M7 (`anvil.compile` on graph IR runs the overflow proof; `run(qu
 consts and unknown keywords raise), A2-M2/M3 (G4 report headlines tier2_static; dedupe feature-identical twins across
 the split and re-report). Re-generate any committed best schedules/reports the fixes change.
 Accept: every A1/A2 medium xfail passes; `make check` green from a clean checkout; G1–G4 reports regenerated.
+
+SG9 done: i16 residual stream + σ-range calibration + eps folded into the RMSNorm sum (ADR-004). Model contract v2 in
+a fixed absolute unit `OUT_UNIT` (v1's 6 LSB = 2.6 OUT_UNIT): TOL 5 OUT_UNIT over σ ∈ [0.02, 3]; held-out (new seed
+20261107) 200k max 1.675. Note the unit change: the A2-H1 test now measures in OUT_UNIT, so it passes partly because the
+unit is absolute rather than per-model; in absolute terms error at σ = 0.02 fell from 3.60 to 1.43 OUT_UNIT. Residual
+error mode: int8 attention internals at small residuals (hill climb 3.03). G2 re-run: 6,732,468 / 5,545,262 cycles,
+bit-exact.
+SG10 done: all A1/A2 mediums fixed, strict xfails removed; `make check` 651 passed from a clean worktree. G1 and G3
+numbers unchanged. G4 now headlined on tier2_static (pooled τ 0.956–0.999, MAPE 2.57 %, guided ratio 0.061, 0.24× the
+cost of Verilator); within-kernel τ at h3 is 0.727, **below the 0.8 target**, and the report says so.
+
+### SG8 — Co-design sweep and ISA proposals (G5)
+Joint search over GpuParams (NUM_CORES 1/2/4, ICACHE_LINES 0/8/16/32, DCACHE_LINES 0/8/16, COALESCE, PIPELINED,
+WARPS_PER_CORE 1/2/4 × WARP_POLICY, SIMT_STACK, mem_latency 0 and 3) for the MLP block, the attention head and the
+SG5 model, each point separately tuned (tier2_static-guided tuner, Verilator timing, every point bit-exact). A hardware
+cost proxy per config (state bits: caches, register files × warps, smem, channels — documented formula, no synthesis).
+Pareto report of cycles vs cost. ISA proposals: candidate instructions (MIN, AND, SHL, signed CMP/BRlt, MULH or a
+fused multiply-add) modelled in a FORK of the ISA model inside the Anvil repo (`anvil/isa_ext/`, never editing sim/),
+with codegen idioms switched to use them, re-tuned on the isasim step count plus the tier-1 timing model extended for the
+new op; savings reported per proposal with the caveat that RTL was not changed.
+Accept (G5): `docs/g5-report.md` where every number points at a cached measurement; Pareto plot; ISA table.
