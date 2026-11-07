@@ -1,0 +1,346 @@
+{
+ "fixed": {
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "cycles": 20577,
+  "isa_ext": {
+   "h": {
+    "mad": 4,
+    "props": [
+     "MAD"
+    ]
+   },
+   "k": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "kT": {
+    "mad": 0,
+    "props": [
+     "MAD"
+    ]
+   },
+   "o": {
+    "mad": 16,
+    "props": [
+     "MAD"
+    ]
+   },
+   "p": {
+    "mad": 0,
+    "props": [
+     "MAD"
+    ]
+   },
+   "q": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "scores": {
+    "mad": 16,
+    "props": [
+     "MAD"
+    ]
+   },
+   "v": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "y": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   }
+  },
+  "kernel_cycles": {
+   "h": 4760,
+   "k": 2431,
+   "kT": 467,
+   "o": 1722,
+   "p": 2309,
+   "q": 2431,
+   "scores": 1595,
+   "v": 2431,
+   "y": 2431
+  },
+  "ops": {
+   "MAD": 164
+  },
+  "steps": 3033,
+  "words": {
+   "h": 184,
+   "k": 201,
+   "kT": 37,
+   "o": 142,
+   "p": 98,
+   "q": 201,
+   "scores": 130,
+   "v": 201,
+   "y": 201
+  }
+ },
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "props": [
+  "MAD"
+ ],
+ "retuned": {
+  "candidates": {
+   "h": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "k": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "kT": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "o": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 4,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "p": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "q": {
+    "params": {
+     "U": 1,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "scores": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "v": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "y": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   }
+  },
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "cycles": 20577,
+  "isa_ext": {
+   "h": {
+    "mad": 4,
+    "props": [
+     "MAD"
+    ]
+   },
+   "k": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "kT": {
+    "mad": 0,
+    "props": [
+     "MAD"
+    ]
+   },
+   "o": {
+    "mad": 16,
+    "props": [
+     "MAD"
+    ]
+   },
+   "p": {
+    "mad": 0,
+    "props": [
+     "MAD"
+    ]
+   },
+   "q": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "scores": {
+    "mad": 16,
+    "props": [
+     "MAD"
+    ]
+   },
+   "v": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   },
+   "y": {
+    "mad": 32,
+    "props": [
+     "MAD"
+    ]
+   }
+  },
+  "kernel_cycles": {
+   "h": 4760,
+   "k": 2431,
+   "kT": 467,
+   "o": 1722,
+   "p": 2309,
+   "q": 2431,
+   "scores": 1595,
+   "v": 2431,
+   "y": 2431
+  },
+  "measured": {
+   "h": 24,
+   "k": 24,
+   "kT": 24,
+   "o": 24,
+   "p": 24,
+   "q": 24,
+   "scores": 24,
+   "v": 24,
+   "y": 24
+  },
+  "ops": {
+   "MAD": 164
+  },
+  "steps": 3033,
+  "tune_seconds": 13.4,
+  "words": {
+   "h": 184,
+   "k": 201,
+   "kT": 37,
+   "o": 142,
+   "p": 98,
+   "q": 201,
+   "scores": 130,
+   "v": 201,
+   "y": 201
+  }
+ },
+ "seconds": 14.1,
+ "variant": "MAD",
+ "workload": "attention"
+}

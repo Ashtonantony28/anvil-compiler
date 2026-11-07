@@ -1,0 +1,319 @@
+{
+ "fixed": {
+  "checked": [
+   "L1.out"
+  ],
+  "cycles": 3497834,
+  "isa_ext": {
+   "L0.act": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.down": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.gate": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.h1": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.h2": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.k": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.kT": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.kh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.o": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.om.t": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.out": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.p": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.q": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.qh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.r1": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.scores": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.up": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.v": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.vh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L0.y": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.act": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.down": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.gate": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.h1": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.h2": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.k": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.kT": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.kh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.o": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.om.t": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.out": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.p": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.q": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.qh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.r1": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.scores": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.up": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.v": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.vh": {
+    "props": [
+     "MIN"
+    ]
+   },
+   "L1.y": {
+    "props": [
+     "MIN"
+    ]
+   }
+  },
+  "kernel_cycles": {
+   "L0.act": 29591,
+   "L0.down": 263511,
+   "L0.gate": 292912,
+   "L0.h1": 28487,
+   "L0.h2": 28489,
+   "L0.k": 134647,
+   "L0.kT": 5205,
+   "L0.kh": 5469,
+   "L0.o": 84167,
+   "L0.om.t": 4589,
+   "L0.out": 12893,
+   "L0.p": 47115,
+   "L0.q": 134647,
+   "L0.qh": 5469,
+   "L0.r1": 12385,
+   "L0.scores": 84631,
+   "L0.up": 292912,
+   "L0.v": 134647,
+   "L0.vh": 5469,
+   "L0.y": 145287,
+   "L1.act": 27975,
+   "L1.down": 263511,
+   "L1.gate": 292912,
+   "L1.h1": 28489,
+   "L1.h2": 28489,
+   "L1.k": 134647,
+   "L1.kT": 5205,
+   "L1.kh": 5469,
+   "L1.o": 78487,
+   "L1.om.t": 4589,
+   "L1.out": 12927,
+   "L1.p": 47115,
+   "L1.q": 134647,
+   "L1.qh": 5469,
+   "L1.r1": 12915,
+   "L1.scores": 84167,
+   "L1.up": 292912,
+   "L1.v": 134647,
+   "L1.vh": 5469,
+   "L1.y": 145271
+  },
+  "ops": {
+   "MIN": 110
+  },
+  "steps": 579496,
+  "words": {
+   "L0.act": 107,
+   "L0.down": 116,
+   "L0.gate": 123,
+   "L0.h1": 194,
+   "L0.h2": 195,
+   "L0.k": 113,
+   "L0.kT": 116,
+   "L0.kh": 126,
+   "L0.o": 107,
+   "L0.om.t": 45,
+   "L0.out": 99,
+   "L0.p": 124,
+   "L0.q": 113,
+   "L0.qh": 126,
+   "L0.r1": 66,
+   "L0.scores": 111,
+   "L0.up": 123,
+   "L0.v": 113,
+   "L0.vh": 126,
+   "L0.y": 188,
+   "L1.act": 105,
+   "L1.down": 116,
+   "L1.gate": 123,
+   "L1.h1": 195,
+   "L1.h2": 195,
+   "L1.k": 113,
+   "L1.kT": 116,
+   "L1.kh": 126,
+   "L1.o": 127,
+   "L1.om.t": 45,
+   "L1.out": 101,
+   "L1.p": 124,
+   "L1.q": 113,
+   "L1.qh": 126,
+   "L1.r1": 100,
+   "L1.scores": 107,
+   "L1.up": 123,
+   "L1.v": 113,
+   "L1.vh": 126,
+   "L1.y": 187
+  }
+ },
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 16,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "props": [
+  "MIN"
+ ],
+ "seconds": 35.6,
+ "variant": "MIN",
+ "workload": "model"
+}

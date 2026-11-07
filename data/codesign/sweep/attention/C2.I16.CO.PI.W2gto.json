@@ -1,0 +1,307 @@
+{
+ "budget": 24,
+ "config": "C2.I16.CO.PI.W2gto",
+ "cost_bits": 11098,
+ "cost_breakdown": {
+  "alu": 128,
+  "data_ctrl": 572,
+  "dcache": 0,
+  "decode+fetch": 136,
+  "dispatch": 17,
+  "icache": 672,
+  "lsu": 1168,
+  "nzp": 24,
+  "prog_ctrl": 77,
+  "registers": 4096,
+  "scheduler": 112,
+  "simt": 0,
+  "smem": 4096
+ },
+ "cycles": 34300,
+ "fields": {
+  "COALESCE": 1,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 16,
+  "NUM_CORES": 2,
+  "PIPELINED": 1,
+  "SIMT_STACK": 0,
+  "WARPS_PER_CORE": 2,
+  "WARP_POLICY": 1,
+  "mem_latency": 0
+ },
+ "kernel_cycles": {
+  "h": 4856,
+  "k": 4707,
+  "kT": 951,
+  "o": 3193,
+  "p": 3482,
+  "q": 4707,
+  "scores": 2990,
+  "v": 4707,
+  "y": 4707
+ },
+ "kernels": {
+  "h": {
+   "cached_cycles": 4856,
+   "candidate": {
+    "params": {
+     "U": 2,
+     "ca": 2,
+     "lanes": 2,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 4856,
+   "key": "a3700b23eec2074da42f22c4fe5cb1e007700a524da99caa59f7d85b8c592c03",
+   "signature": "9d3628b1764ba2cc177a",
+   "words": 138
+  },
+  "k": {
+   "cached_cycles": 4707,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 70,
+   "isolated": 4707,
+   "key": "7d79b4707f4b21e62373407541688adeda922bcec55b5add08f755e575d254af",
+   "measured": 24,
+   "signature": "077554d090f4d97bb08c",
+   "timed": 6,
+   "tune_seconds": 2.82,
+   "words": 119
+  },
+  "kT": {
+   "cached_cycles": 951,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 3,
+   "isolated": 951,
+   "key": "65c9f9c5c836db92bce5cc1120f95b071382f4ebe3ca234b6732e1319404a4b0",
+   "measured": 24,
+   "signature": "279a557cc0133826b927",
+   "timed": 8,
+   "tune_seconds": 1.48,
+   "words": 44
+  },
+  "o": {
+   "cached_cycles": 3193,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ji",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 89,
+   "isolated": 3193,
+   "key": "f05785eb0e8bc9aebf856cfe1fb869a6cea482e1e90746593a1fcc536fea3d75",
+   "measured": 24,
+   "signature": "eac83646e57b9b36bad0",
+   "timed": 7,
+   "tune_seconds": 3.41,
+   "words": 162
+  },
+  "p": {
+   "cached_cycles": 3482,
+   "candidate": {
+    "params": {
+     "U": 1,
+     "ca": 2,
+     "lanes": 2,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 95,
+   "isolated": 3482,
+   "key": "1ab439f2b84072d3ac2ac341873cac0b34bdc3ccaaecc2b13502fe4cbe82c8b7",
+   "measured": 24,
+   "signature": "d3c6db1ef0f86e3833ba",
+   "timed": 9,
+   "tune_seconds": 4.94,
+   "words": 132
+  },
+  "q": {
+   "cached_cycles": 4707,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 69,
+   "isolated": 4707,
+   "key": "5e9ff4687f0a9e766c1438e1f845e36ae5ec565f1c3d29fbbca2c51574c90815",
+   "measured": 24,
+   "signature": "560987bc088b109f7a60",
+   "timed": 6,
+   "tune_seconds": 3.06,
+   "words": 119
+  },
+  "scores": {
+   "cached_cycles": 2990,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 61,
+   "isolated": 2990,
+   "key": "7f7bbc5005f6c4fd549dc4e7812f479596ae691c4d443324189c0083a922d75e",
+   "measured": 24,
+   "signature": "db2f5496f591b2d2b02a",
+   "timed": 5,
+   "tune_seconds": 2.76,
+   "words": 77
+  },
+  "v": {
+   "cached_cycles": 4707,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 81,
+   "isolated": 4707,
+   "key": "75aca8fb67c9fede4417eb3f411b2e8de4749142dac7793cfe03031fcea2809c",
+   "measured": 24,
+   "signature": "45d021aadfc6148a781b",
+   "timed": 6,
+   "tune_seconds": 3.14,
+   "words": 119
+  },
+  "y": {
+   "cached_cycles": 4707,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 74,
+   "isolated": 4707,
+   "key": "c6e42a6c9136beb1e2e33ea4bd7fa38e1645aa3b037a5cbf27e1214a11a433f0",
+   "measured": 24,
+   "signature": "16301ad32214531ad407",
+   "timed": 6,
+   "tune_seconds": 3.87,
+   "words": 119
+  }
+ },
+ "mem_latency": 0,
+ "params": {
+  "COALESCE": 1,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 16,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 1,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 2,
+  "WARP_POLICY": 1,
+  "WORD_BITS": 32
+ },
+ "run_seconds": 0.1,
+ "seed": 0,
+ "topk": 2,
+ "tune_seconds": 26.2,
+ "verify": {
+  "block_races": 0,
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "flags": {
+   "divergent": 0,
+   "race_words": 0,
+   "store_races": 0,
+   "stores_conflict": 0
+  }
+ },
+ "workload": "attention"
+}

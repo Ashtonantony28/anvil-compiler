@@ -1,0 +1,316 @@
+{
+ "budget": 24,
+ "config": "C4.W4lrr.S",
+ "cost_bits": 23713,
+ "cost_breakdown": {
+  "alu": 128,
+  "data_ctrl": 824,
+  "dcache": 0,
+  "decode+fetch": 272,
+  "dispatch": 17,
+  "icache": 0,
+  "lsu": 2336,
+  "nzp": 48,
+  "prog_ctrl": 116,
+  "registers": 8192,
+  "scheduler": 388,
+  "simt": 3200,
+  "smem": 8192
+ },
+ "cycles": 89966,
+ "fields": {
+  "COALESCE": 0,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "NUM_CORES": 4,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "WARPS_PER_CORE": 4,
+  "WARP_POLICY": 0,
+  "mem_latency": 0
+ },
+ "kernel_cycles": {
+  "h": 11726,
+  "k": 13042,
+  "kT": 2234,
+  "o": 8450,
+  "p": 8290,
+  "q": 13042,
+  "scores": 7018,
+  "v": 13082,
+  "y": 13082
+ },
+ "kernels": {
+  "h": {
+   "cached_cycles": 11726,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 2,
+     "lanes": 2,
+     "mode": "thread",
+     "pred": "auto",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 11726,
+   "key": "f9caa2238ad26b80cca1106bfa50eceba7e156b2aa37be21679d892d82fd0977",
+   "signature": "4fef7b442c784242f947",
+   "words": 201
+  },
+  "k": {
+   "cached_cycles": 13042,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 85,
+   "isolated": 13042,
+   "key": "d2c8f02ef0333a3c0f9a5dbedfdcfe35bea22cd1afff045b1e0cf760cc13e5d2",
+   "measured": 24,
+   "signature": "51eef7aacacdd77e4c1e",
+   "timed": 3,
+   "tune_seconds": 4.49,
+   "words": 239
+  },
+  "kT": {
+   "cached_cycles": 2234,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "pred": "auto",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 0,
+   "isolated": 2234,
+   "key": "54a4be3aafd4dd9bb706e4b37f32105aacb823f00fd9b25b7bee7e4a4225e711",
+   "measured": 24,
+   "signature": "8f632fa640a4377ec6a5",
+   "timed": 5,
+   "tune_seconds": 1.49,
+   "words": 38
+  },
+  "o": {
+   "cached_cycles": 8450,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 75,
+   "isolated": 8450,
+   "key": "317ee985dd62c4dd7db3be16b2d26958b6872feb05fb4ddc550c656078ae25d2",
+   "measured": 24,
+   "signature": "3d2fcf2cd036e43c80a9",
+   "timed": 5,
+   "tune_seconds": 3.17,
+   "words": 155
+  },
+  "p": {
+   "cached_cycles": 8290,
+   "candidate": {
+    "params": {
+     "U": 1,
+     "ca": 4,
+     "lanes": 2,
+     "mode": "thread",
+     "pred": "auto",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 70,
+   "isolated": 8290,
+   "key": "13f3853e1d508707cc67035a023b614b5ea7e0eb3edf7d1a9bda9619b8f094c5",
+   "measured": 24,
+   "signature": "6a2f27f9750aa1324f5b",
+   "timed": 9,
+   "tune_seconds": 4.9,
+   "words": 122
+  },
+  "q": {
+   "cached_cycles": 13042,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 73,
+   "isolated": 13042,
+   "key": "5156a85ef79f7ea97835687c0a61db0ae0e235e25be57009ceb1fabe67d57914",
+   "measured": 24,
+   "signature": "3b6919226a82ce22aa70",
+   "timed": 6,
+   "tune_seconds": 3.94,
+   "words": 239
+  },
+  "scores": {
+   "cached_cycles": 7018,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 2,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 79,
+   "isolated": 7018,
+   "key": "78739c1e03d9443d677c27af8b7c99aae34f5475cb00d82ef3b40f9fbd9fdb0c",
+   "measured": 24,
+   "signature": "b9517fb5a40d1558992c",
+   "timed": 8,
+   "tune_seconds": 4.4,
+   "words": 241
+  },
+  "v": {
+   "cached_cycles": 13082,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 84,
+   "isolated": 13082,
+   "key": "77da6e5fc331c38b6fb5e2fb1dcc6d88693c30804368fa4b07c8b184caba420a",
+   "measured": 24,
+   "signature": "76360176c73af489243e",
+   "timed": 5,
+   "tune_seconds": 4.3,
+   "words": 239
+  },
+  "y": {
+   "cached_cycles": 13082,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 72,
+   "isolated": 13082,
+   "key": "6509ef5243635874de93a063363508b696dd2368839d65e80507a1a7644e7df4",
+   "measured": 24,
+   "signature": "bd0f1f47a90edd983c9b",
+   "timed": 5,
+   "tune_seconds": 4.5,
+   "words": 239
+  }
+ },
+ "mem_latency": 0,
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 4,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 4,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "run_seconds": 0.2,
+ "seed": 0,
+ "topk": 2,
+ "tune_seconds": 32.1,
+ "verify": {
+  "block_races": 0,
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "flags": {
+   "divergent": 0,
+   "race_words": 0,
+   "store_races": 0,
+   "stores_conflict": 0
+  }
+ },
+ "workload": "attention"
+}

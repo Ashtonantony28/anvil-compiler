@@ -1,0 +1,346 @@
+{
+ "fixed": {
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "cycles": 21589,
+  "isa_ext": {
+   "h": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 4
+   },
+   "k": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "kT": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "o": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "p": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "q": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "scores": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "v": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "y": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   }
+  },
+  "kernel_cycles": {
+   "h": 4012,
+   "k": 2783,
+   "kT": 467,
+   "o": 1898,
+   "p": 2309,
+   "q": 2783,
+   "scores": 1771,
+   "v": 2783,
+   "y": 2783
+  },
+  "ops": {
+   "SHL": 4
+  },
+  "steps": 3285,
+  "words": {
+   "h": 153,
+   "k": 233,
+   "kT": 37,
+   "o": 158,
+   "p": 98,
+   "q": 233,
+   "scores": 146,
+   "v": 233,
+   "y": 233
+  }
+ },
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "props": [
+  "SHL"
+ ],
+ "retuned": {
+  "candidates": {
+   "h": {
+    "params": {
+     "U": 8,
+     "ca": 3,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "k": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "kT": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "o": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 4,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "p": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "q": {
+    "params": {
+     "U": 1,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "scores": {
+    "params": {
+     "U": 8,
+     "ca": 3,
+     "kc": 4,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "v": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "y": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   }
+  },
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "cycles": 21439,
+  "isa_ext": {
+   "h": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 8
+   },
+   "k": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "kT": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "o": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "p": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "q": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "scores": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "v": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   },
+   "y": {
+    "props": [
+     "SHL"
+    ],
+    "shl_round": 0
+   }
+  },
+  "kernel_cycles": {
+   "h": 3868,
+   "k": 2783,
+   "kT": 467,
+   "o": 1898,
+   "p": 2309,
+   "q": 2783,
+   "scores": 1765,
+   "v": 2783,
+   "y": 2783
+  },
+  "measured": {
+   "h": 24,
+   "k": 24,
+   "kT": 24,
+   "o": 24,
+   "p": 24,
+   "q": 24,
+   "scores": 24,
+   "v": 24,
+   "y": 24
+  },
+  "ops": {
+   "SHL": 8
+  },
+  "steps": 3269,
+  "tune_seconds": 15.1,
+  "words": {
+   "h": 243,
+   "k": 233,
+   "kT": 37,
+   "o": 158,
+   "p": 98,
+   "q": 233,
+   "scores": 145,
+   "v": 233,
+   "y": 233
+  }
+ },
+ "seconds": 15.9,
+ "variant": "SHL",
+ "workload": "attention"
+}

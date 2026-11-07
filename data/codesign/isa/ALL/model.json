@@ -1,0 +1,607 @@
+{
+ "fixed": {
+  "checked": [
+   "L1.out"
+  ],
+  "cycles": 3013178,
+  "isa_ext": {
+   "L0.act": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.down": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.gate": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.h1": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 4
+   },
+   "L0.h2": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 4
+   },
+   "L0.k": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.kT": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.kh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.o": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.om.t": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.out": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.p": {
+    "and_mod": 3,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.q": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.qh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.r1": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.scores": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.up": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.v": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.vh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L0.y": {
+    "and_mod": 0,
+    "mad_fallback": 1,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.act": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.down": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.gate": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.h1": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 4
+   },
+   "L1.h2": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 4
+   },
+   "L1.k": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.kT": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.kh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.o": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.om.t": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.out": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.p": {
+    "and_mod": 3,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.q": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.qh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.r1": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.scores": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.up": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.v": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.vh": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "L1.y": {
+    "and_mod": 0,
+    "mad_fallback": 1,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   }
+  },
+  "kernel_cycles": {
+   "L0.act": 29591,
+   "L0.down": 218455,
+   "L0.gate": 246448,
+   "L0.h1": 23637,
+   "L0.h2": 23463,
+   "L0.k": 112119,
+   "L0.kT": 5205,
+   "L0.kh": 5469,
+   "L0.o": 72903,
+   "L0.om.t": 4589,
+   "L0.out": 12893,
+   "L0.p": 42759,
+   "L0.q": 112119,
+   "L0.qh": 5469,
+   "L0.r1": 12385,
+   "L0.scores": 73367,
+   "L0.up": 246448,
+   "L0.v": 112119,
+   "L0.vh": 5469,
+   "L0.y": 145287,
+   "L1.act": 27975,
+   "L1.down": 218455,
+   "L1.gate": 246448,
+   "L1.h1": 23463,
+   "L1.h2": 23463,
+   "L1.k": 112119,
+   "L1.kT": 5205,
+   "L1.kh": 5469,
+   "L1.o": 67399,
+   "L1.om.t": 4589,
+   "L1.out": 12927,
+   "L1.p": 42759,
+   "L1.q": 112119,
+   "L1.qh": 5469,
+   "L1.r1": 12915,
+   "L1.scores": 72903,
+   "L1.up": 246448,
+   "L1.v": 112119,
+   "L1.vh": 5469,
+   "L1.y": 145271
+  },
+  "ops": {
+   "AND": 6,
+   "MAD": 64,
+   "MIN": 110,
+   "SHL": 21,
+   "SLT": 6
+  },
+  "steps": 492408,
+  "words": {
+   "L0.act": 107,
+   "L0.down": 112,
+   "L0.gate": 119,
+   "L0.h1": 166,
+   "L0.h2": 163,
+   "L0.k": 109,
+   "L0.kT": 116,
+   "L0.kh": 126,
+   "L0.o": 103,
+   "L0.om.t": 45,
+   "L0.out": 99,
+   "L0.p": 115,
+   "L0.q": 109,
+   "L0.qh": 126,
+   "L0.r1": 66,
+   "L0.scores": 107,
+   "L0.up": 119,
+   "L0.v": 109,
+   "L0.vh": 126,
+   "L0.y": 188,
+   "L1.act": 105,
+   "L1.down": 112,
+   "L1.gate": 119,
+   "L1.h1": 163,
+   "L1.h2": 163,
+   "L1.k": 109,
+   "L1.kT": 116,
+   "L1.kh": 126,
+   "L1.o": 124,
+   "L1.om.t": 45,
+   "L1.out": 101,
+   "L1.p": 115,
+   "L1.q": 109,
+   "L1.qh": 126,
+   "L1.r1": 100,
+   "L1.scores": 103,
+   "L1.up": 119,
+   "L1.v": 109,
+   "L1.vh": 126,
+   "L1.y": 187
+  }
+ },
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 16,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "props": [
+  "MIN",
+  "AND",
+  "SHL",
+  "SLT",
+  "MAD"
+ ],
+ "seconds": 35.7,
+ "variant": "ALL",
+ "workload": "model"
+}

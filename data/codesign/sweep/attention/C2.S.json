@@ -1,0 +1,316 @@
+{
+ "budget": 24,
+ "config": "C2.S",
+ "cost_bits": 10870,
+ "cost_breakdown": {
+  "alu": 256,
+  "data_ctrl": 540,
+  "dcache": 0,
+  "decode+fetch": 136,
+  "dispatch": 17,
+  "icache": 0,
+  "lsu": 1136,
+  "nzp": 24,
+  "prog_ctrl": 77,
+  "registers": 4096,
+  "scheduler": 26,
+  "simt": 466,
+  "smem": 4096
+ },
+ "cycles": 22333,
+ "fields": {
+  "COALESCE": 0,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "mem_latency": 0
+ },
+ "kernel_cycles": {
+  "h": 4848,
+  "k": 2783,
+  "kT": 467,
+  "o": 1812,
+  "p": 2309,
+  "q": 2783,
+  "scores": 1765,
+  "v": 2783,
+  "y": 2783
+ },
+ "kernels": {
+  "h": {
+   "cached_cycles": 4848,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "thread",
+     "pred": "auto",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 4848,
+   "key": "190f32cdf1da83b3cb497fc66256cce162a92c4955cafbde4be5deb03e79789f",
+   "signature": "b5b57eb415a2707961ee",
+   "words": 188
+  },
+  "k": {
+   "cached_cycles": 2783,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 91,
+   "isolated": 2783,
+   "key": "9961a567a9c9d8a4164a1411f6d98bcb9edc88ff8b5d9259996ce272a2d38026",
+   "measured": 24,
+   "signature": "9c65fd65ea29b338d505",
+   "timed": 4,
+   "tune_seconds": 4.0,
+   "words": 233
+  },
+  "kT": {
+   "cached_cycles": 467,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "strided",
+     "pred": "auto",
+     "tail": "mask",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 0,
+   "isolated": 467,
+   "key": "20321681cb9eebcd53314721db20dca2fc09778f0756e8f0ed349889c7349e83",
+   "measured": 24,
+   "signature": "469e98f5bb5f5b160410",
+   "timed": 5,
+   "tune_seconds": 1.31,
+   "words": 37
+  },
+  "o": {
+   "cached_cycles": 1812,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 79,
+   "isolated": 1812,
+   "key": "36b0c5d68019b75974e072b6c0fa8658b61a5e718704501690438e1f31126f2c",
+   "measured": 24,
+   "signature": "e78f44e3b183b241081d",
+   "timed": 5,
+   "tune_seconds": 2.99,
+   "words": 152
+  },
+  "p": {
+   "cached_cycles": 2309,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "block",
+     "pred": "auto",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 101,
+   "isolated": 2309,
+   "key": "611e93e7961192edccbb8a8ab166e75393d9727e997f5b579a829feb9a489122",
+   "measured": 24,
+   "signature": "39fae5eecdbe674732cd",
+   "timed": 7,
+   "tune_seconds": 4.74,
+   "words": 98
+  },
+  "q": {
+   "cached_cycles": 2783,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 83,
+   "isolated": 2783,
+   "key": "619fff8c64b0ef673f3e3e9748e6e5943cf61bf161b5c2ddca77d6c06699b7dc",
+   "measured": 24,
+   "signature": "931f352d9b33715ff333",
+   "timed": 5,
+   "tune_seconds": 3.59,
+   "words": 233
+  },
+  "scores": {
+   "cached_cycles": 1765,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 64,
+   "isolated": 1765,
+   "key": "92d42466032658672aaba746d68ecb4b820a206158b3d771d8deb5fb191d1ae3",
+   "measured": 24,
+   "signature": "5fbc1ec9a8b936f69f6c",
+   "timed": 5,
+   "tune_seconds": 3.35,
+   "words": 145
+  },
+  "v": {
+   "cached_cycles": 2783,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 81,
+   "isolated": 2783,
+   "key": "97577e71198b12d9a27a4f524fd3df0daad78b50c7c9c6d48ed2cee3f4453342",
+   "measured": 24,
+   "signature": "50c5dddd8ef02b57dd10",
+   "timed": 7,
+   "tune_seconds": 4.29,
+   "words": 233
+  },
+  "y": {
+   "cached_cycles": 2783,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 83,
+   "isolated": 2783,
+   "key": "55bf9567d82b0b80ee46f22e5eec8d2c447045c83165c3aa7aeef6eb1a93698b",
+   "measured": 24,
+   "signature": "eb9239f7483213cfd6d0",
+   "timed": 6,
+   "tune_seconds": 4.28,
+   "words": 233
+  }
+ },
+ "mem_latency": 0,
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "run_seconds": 0.0,
+ "seed": 0,
+ "topk": 2,
+ "tune_seconds": 29.5,
+ "verify": {
+  "block_races": 0,
+  "checked": [
+   "h",
+   "k",
+   "kT",
+   "o",
+   "p",
+   "q",
+   "scores",
+   "v",
+   "y"
+  ],
+  "flags": {
+   "divergent": 0,
+   "race_words": 0,
+   "store_races": 0,
+   "stores_conflict": 0
+  }
+ },
+ "workload": "attention"
+}

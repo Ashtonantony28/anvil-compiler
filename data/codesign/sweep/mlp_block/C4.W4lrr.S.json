@@ -1,0 +1,233 @@
+{
+ "budget": 24,
+ "config": "C4.W4lrr.S",
+ "cost_bits": 23713,
+ "cost_breakdown": {
+  "alu": 128,
+  "data_ctrl": 824,
+  "dcache": 0,
+  "decode+fetch": 272,
+  "dispatch": 17,
+  "icache": 0,
+  "lsu": 2336,
+  "nzp": 48,
+  "prog_ctrl": 116,
+  "registers": 8192,
+  "scheduler": 388,
+  "simt": 3200,
+  "smem": 8192
+ },
+ "cycles": 98790,
+ "fields": {
+  "COALESCE": 0,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "NUM_CORES": 4,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "WARPS_PER_CORE": 4,
+  "WARP_POLICY": 0,
+  "mem_latency": 0
+ },
+ "kernel_cycles": {
+  "act": 10054,
+  "down": 22204,
+  "gate": 24808,
+  "h": 11726,
+  "out": 5190,
+  "up": 24808
+ },
+ "kernels": {
+  "act": {
+   "cached_cycles": 10054,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 2,
+     "mode": "strided",
+     "pred": "auto",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 12,
+   "isolated": 10054,
+   "key": "36b19aecd8f061769aae39832a7382fe78af9f995c067dad334b22ccdd70bdd2",
+   "measured": 24,
+   "signature": "3e5edb198ef99440befb",
+   "timed": 13,
+   "tune_seconds": 2.92,
+   "words": 114
+  },
+  "down": {
+   "cached_cycles": 22204,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 1,
+     "order": "ij",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 85,
+   "isolated": 22204,
+   "key": "ec2b14ff61b2e47db68e9974b72f4ab3d2f8e99304a55d7bf2eb59d1b69a6b95",
+   "measured": 24,
+   "signature": "d6cde99a5bb6893fef6c",
+   "timed": 8,
+   "tune_seconds": 4.42,
+   "words": 254
+  },
+  "gate": {
+   "cached_cycles": 24808,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 2,
+     "order": "ji",
+     "pred": "mask",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 77,
+   "isolated": 24808,
+   "key": "b74f9cbbdd064c6231638ca358eb9833fa4c833fe96d54593c46d8373b0ed704",
+   "measured": 24,
+   "signature": "631eb6c67cfa0fcdf0b0",
+   "timed": 14,
+   "tune_seconds": 4.96,
+   "words": 244
+  },
+  "h": {
+   "cached_cycles": 11726,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 2,
+     "lanes": 2,
+     "mode": "thread",
+     "pred": "auto",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 84,
+   "isolated": 11726,
+   "key": "f9caa2238ad26b80cca1106bfa50eceba7e156b2aa37be21679d892d82fd0977",
+   "measured": 24,
+   "signature": "4fef7b442c784242f947",
+   "timed": 10,
+   "tune_seconds": 11.14,
+   "words": 201
+  },
+  "out": {
+   "cached_cycles": 5190,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "lanes": 2,
+     "mode": "strided",
+     "pred": "auto",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 13,
+   "isolated": 5190,
+   "key": "5df211c5ece135efe6a8465da4d89e361d8289f2c6e2ab0ac269f4bf73ad88ad",
+   "measured": 24,
+   "signature": "d3d696a9cd57588f48de",
+   "timed": 10,
+   "tune_seconds": 2.67,
+   "words": 173
+  },
+  "up": {
+   "cached_cycles": 24808,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 2,
+     "order": "ji",
+     "pred": "auto",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 92,
+   "isolated": 24808,
+   "key": "dacc5e403097f80dbd83ff88616075013fa910c93d8657bbb111a8e1059be075",
+   "measured": 24,
+   "signature": "9b05f8f55905abe9df07",
+   "timed": 8,
+   "tune_seconds": 4.5,
+   "words": 244
+  }
+ },
+ "mem_latency": 0,
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 4,
+  "PIPELINED": 0,
+  "SIMT_STACK": 1,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 4,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "run_seconds": 0.2,
+ "seed": 0,
+ "topk": 2,
+ "tune_seconds": 31.3,
+ "verify": {
+  "block_races": 0,
+  "checked": [
+   "act",
+   "down",
+   "gate",
+   "h",
+   "out",
+   "up"
+  ],
+  "flags": {
+   "divergent": 0,
+   "race_words": 0,
+   "store_races": 0,
+   "stores_conflict": 0
+  }
+ },
+ "workload": "mlp_block"
+}

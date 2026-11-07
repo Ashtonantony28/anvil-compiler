@@ -1,0 +1,324 @@
+{
+ "fixed": {
+  "checked": [
+   "act",
+   "down",
+   "gate",
+   "h",
+   "out",
+   "up"
+  ],
+  "cycles": 20840,
+  "isa_ext": {
+   "act": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "down": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "gate": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "h": {
+    "and_mod": 0,
+    "mad": 4,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 4
+   },
+   "out": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "up": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   }
+  },
+  "kernel_cycles": {
+   "act": 1955,
+   "down": 4021,
+   "gate": 5111,
+   "h": 3737,
+   "out": 1051,
+   "up": 4965
+  },
+  "ops": {
+   "MAD": 100,
+   "MIN": 28,
+   "SHL": 4
+  },
+  "steps": 3136,
+  "words": {
+   "act": 160,
+   "down": 203,
+   "gate": 209,
+   "h": 140,
+   "out": 86,
+   "up": 206
+  }
+ },
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 12,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "props": [
+  "MIN",
+  "AND",
+  "SHL",
+  "SLT",
+  "MAD"
+ ],
+ "retuned": {
+  "candidates": {
+   "act": {
+    "params": {
+     "U": 16,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 8
+    },
+    "sketch": "ew"
+   },
+   "down": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "gate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 4,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "h": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "template": "rows_per_thread"
+    },
+    "sketch": "tpl"
+   },
+   "out": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "pad",
+     "v": 4
+    },
+    "sketch": "ew"
+   },
+   "up": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 1,
+     "ku": 8,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   }
+  },
+  "checked": [
+   "act",
+   "down",
+   "gate",
+   "h",
+   "out",
+   "up"
+  ],
+  "cycles": 20702,
+  "isa_ext": {
+   "act": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "down": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "gate": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "h": {
+    "and_mod": 0,
+    "mad": 8,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 8
+   },
+   "out": {
+    "and_mod": 0,
+    "mad": 0,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   },
+   "up": {
+    "and_mod": 0,
+    "mad": 32,
+    "props": [
+     "AND",
+     "MAD",
+     "MIN",
+     "SHL",
+     "SLT"
+    ],
+    "shl_round": 0
+   }
+  },
+  "kernel_cycles": {
+   "act": 1955,
+   "down": 4021,
+   "gate": 5111,
+   "h": 3604,
+   "out": 1046,
+   "up": 4965
+  },
+  "measured": {
+   "act": 24,
+   "down": 24,
+   "gate": 24,
+   "h": 24,
+   "out": 24,
+   "up": 24
+  },
+  "ops": {
+   "MAD": 104,
+   "MIN": 32,
+   "SHL": 8
+  },
+  "steps": 3123,
+  "tune_seconds": 7.9,
+  "words": {
+   "act": 160,
+   "down": 203,
+   "gate": 209,
+   "h": 219,
+   "out": 86,
+   "up": 206
+  }
+ },
+ "seconds": 8.5,
+ "variant": "ALL",
+ "workload": "mlp_block"
+}

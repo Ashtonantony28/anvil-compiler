@@ -1,0 +1,1053 @@
+{
+ "budget": 12,
+ "config": "C2.L3",
+ "cost_bits": 10500,
+ "cost_breakdown": {
+  "alu": 256,
+  "data_ctrl": 572,
+  "dcache": 0,
+  "decode+fetch": 136,
+  "dispatch": 17,
+  "icache": 0,
+  "lsu": 1200,
+  "nzp": 24,
+  "prog_ctrl": 77,
+  "registers": 4096,
+  "scheduler": 26,
+  "simt": 0,
+  "smem": 4096
+ },
+ "cycles": 5054800,
+ "fields": {
+  "COALESCE": 0,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "mem_latency": 3
+ },
+ "kernel_cycles": {
+  "L0.act": 43910,
+  "L0.down": 379866,
+  "L0.gate": 422369,
+  "L0.h1": 43128,
+  "L0.h2": 43136,
+  "L0.k": 195290,
+  "L0.kT": 7396,
+  "L0.kh": 7742,
+  "L0.o": 112602,
+  "L0.om.t": 6500,
+  "L0.out": 20540,
+  "L0.p": 67998,
+  "L0.q": 195290,
+  "L0.qh": 7742,
+  "L0.r1": 19796,
+  "L0.scores": 123098,
+  "L0.up": 422369,
+  "L0.v": 195290,
+  "L0.vh": 7742,
+  "L0.y": 210426,
+  "L1.act": 43910,
+  "L1.down": 379866,
+  "L1.gate": 422369,
+  "L1.h1": 43136,
+  "L1.h2": 43136,
+  "L1.k": 195290,
+  "L1.kT": 7396,
+  "L1.kh": 7742,
+  "L1.o": 112602,
+  "L1.om.t": 6500,
+  "L1.out": 20592,
+  "L1.p": 67998,
+  "L1.q": 195290,
+  "L1.qh": 7742,
+  "L1.r1": 20572,
+  "L1.scores": 112602,
+  "L1.up": 422369,
+  "L1.v": 195290,
+  "L1.vh": 7742,
+  "L1.y": 210426
+ },
+ "kernels": {
+  "L0.act": {
+   "cached_cycles": 43910,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 12,
+   "isolated": 43910,
+   "key": "9b281174adb6666cf5e2121faca2cbc9a600d7bfa562f94d8495823c5301a9c3",
+   "measured": 12,
+   "signature": "e0d01e095e8f878f5f1a",
+   "timed": 8,
+   "tune_seconds": 3.54,
+   "words": 111
+  },
+  "L0.down": {
+   "cached_cycles": 379866,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 55,
+   "isolated": 379866,
+   "key": "37c424cda281c11bea3556ed455d846f5af307c7fe6f5b864a551d00168e0be9",
+   "measured": 12,
+   "signature": "de868020121f2c172be7",
+   "timed": 6,
+   "tune_seconds": 17.97,
+   "words": 124
+  },
+  "L0.gate": {
+   "cached_cycles": 422369,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 45,
+   "isolated": 422369,
+   "key": "2fb244ccb275b2e35fa6219d94643ed2608eadd30c1b15f95ac9e8f3d8b25f71",
+   "measured": 12,
+   "signature": "1174f84d4c4be3aad296",
+   "timed": 5,
+   "tune_seconds": 10.57,
+   "words": 132
+  },
+  "L0.h1": {
+   "cached_cycles": 43128,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 2,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "pad"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 51,
+   "isolated": 43128,
+   "key": "20fac653413fbeb3a6123457c33a8cf6356aa85abae9e3a4252ae20b9e02d76b",
+   "measured": 12,
+   "signature": "0358ba5a4f4a07d2862a",
+   "timed": 5,
+   "tune_seconds": 3.53,
+   "words": 202
+  },
+  "L0.h2": {
+   "cached_cycles": 43136,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 45,
+   "isolated": 43136,
+   "key": "7fb50f376cc9bb6b9d860eb0b5b5d2cf7b1fdfba6487b5ad1b2c6a179477f953",
+   "measured": 12,
+   "signature": "4c6b9d85e1538c449cf4",
+   "timed": 8,
+   "tune_seconds": 4.45,
+   "words": 203
+  },
+  "L0.k": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 47,
+   "isolated": 195290,
+   "key": "a2271a1e0fa5b5d62aaac742dc83756d080c4b7757f5e2aae9dcd157fa09c23c",
+   "measured": 12,
+   "signature": "8b576eac635bbbc8d1f3",
+   "timed": 4,
+   "tune_seconds": 4.53,
+   "words": 122
+  },
+  "L0.kT": {
+   "cached_cycles": 7396,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 1,
+   "isolated": 7396,
+   "key": "84b3439c29b62ab4d67a078bf21ea348427c7e7db96144f36aabd18e3c183f59",
+   "measured": 12,
+   "signature": "d0b963b0eae399298318",
+   "timed": 5,
+   "tune_seconds": 1.55,
+   "words": 116
+  },
+  "L0.kh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "key_from": "L0.qh",
+   "signature": "f082a5f6bcf79ef43af4",
+   "words": 73
+  },
+  "L0.o": {
+   "cached_cycles": 112602,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 41,
+   "isolated": 112602,
+   "key": "06a2c3a21a63bdfd1b3903d9f71a6add24ca5c43de05a974bfe3bfea69615d8d",
+   "measured": 12,
+   "signature": "c3650bea076e834a74f0",
+   "timed": 2,
+   "tune_seconds": 2.85,
+   "words": 127
+  },
+  "L0.om.t": {
+   "cached_cycles": 6500,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 0,
+   "isolated": 6500,
+   "key": "99701282f327bb6754003d297a7c8ef8a41a6b1cfb1090e485431cc7e4eda454",
+   "measured": 12,
+   "signature": "1886adc1519ea09db1e2",
+   "timed": 7,
+   "tune_seconds": 1.43,
+   "words": 45
+  },
+  "L0.out": {
+   "cached_cycles": 20540,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 9,
+   "isolated": 20540,
+   "key": "699106d262866a3901f1919eee08099b1d56cc5926d2a7df6a636c7af7cd5f63",
+   "measured": 12,
+   "signature": "bc7607e6ac42631ffbde",
+   "timed": 9,
+   "tune_seconds": 2.2,
+   "words": 107
+  },
+  "L0.p": {
+   "cached_cycles": 67998,
+   "candidate": {
+    "params": {
+     "U": 1,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "searched",
+   "invalid": 43,
+   "isolated": 67998,
+   "key": "57f29860f25a12f092bf0a344412f6de5d7117b70f8aa56b58859532caf4515d",
+   "measured": 12,
+   "signature": "982bad222383ea1fc351",
+   "timed": 7,
+   "tune_seconds": 6.13,
+   "words": 124
+  },
+  "L0.q": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 43,
+   "isolated": 195290,
+   "key": "87e8565ff6f4e0c3aea0ec2cf0c4b40d2deb334e6bcb21eb02c08348ec2a1399",
+   "measured": 12,
+   "signature": "49ea200bd65d9d908439",
+   "timed": 2,
+   "tune_seconds": 3.78,
+   "words": 122
+  },
+  "L0.qh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 1,
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "measured": 12,
+   "signature": "f082a5f6bcf79ef43af4",
+   "timed": 7,
+   "tune_seconds": 1.5,
+   "words": 73
+  },
+  "L0.r1": {
+   "cached_cycles": 19796,
+   "candidate": {
+    "params": {
+     "U": 2,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 9,
+   "isolated": 19796,
+   "key": "c2afbc5d49a839965dd06c36ea1343c64a8572be1b5430d31df72425170ace5e",
+   "measured": 12,
+   "signature": "533894592d1bb23d4c0e",
+   "timed": 9,
+   "tune_seconds": 2.27,
+   "words": 70
+  },
+  "L0.scores": {
+   "cached_cycles": 123098,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ji",
+     "stage": "none",
+     "ti": 4,
+     "tj": 1
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 47,
+   "isolated": 123098,
+   "key": "aeef45c65af512cfffcd4ac59f73157b07a162719b160f69d809ea73a8b9a908",
+   "measured": 12,
+   "signature": "96ffec74c60be823101b",
+   "timed": 3,
+   "tune_seconds": 4.38,
+   "words": 117
+  },
+  "L0.up": {
+   "cached_cycles": 422369,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 50,
+   "isolated": 422369,
+   "key": "80b2ba452d19876faeda4546efca68424ff32a9242903028441a8443759ab29f",
+   "measured": 12,
+   "signature": "de77c4e81571ed33645e",
+   "timed": 5,
+   "tune_seconds": 8.81,
+   "words": 132
+  },
+  "L0.v": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 46,
+   "isolated": 195290,
+   "key": "90eec2724c8d06aca93bdf9d803d7ca7d9f98077dfa761922516953f5346e74a",
+   "measured": 12,
+   "signature": "687e569eb8654007bc18",
+   "timed": 5,
+   "tune_seconds": 4.45,
+   "words": 122
+  },
+  "L0.vh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "key_from": "L0.kh",
+   "signature": "f082a5f6bcf79ef43af4",
+   "words": 73
+  },
+  "L0.y": {
+   "cached_cycles": 210426,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 52,
+   "isolated": 210426,
+   "key": "ee77219310d8feabf60921be9d49f174918178490a5c105221eca8c2ea75a60a",
+   "measured": 12,
+   "signature": "aa110412cc41230fe7df",
+   "timed": 2,
+   "tune_seconds": 6.09,
+   "words": 195
+  },
+  "L1.act": {
+   "cached_cycles": 43910,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 17,
+   "isolated": 43910,
+   "key": "16109ff70f8617b2d5210d711ed54641f2b7b56b96eca1c698b616660f053053",
+   "measured": 12,
+   "signature": "fe8c3763ff7a702afdce",
+   "timed": 7,
+   "tune_seconds": 3.55,
+   "words": 111
+  },
+  "L1.down": {
+   "cached_cycles": 379866,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 45,
+   "isolated": 379866,
+   "key": "0a156ed4c5d4317466d41cae7e437cf98389d1268be1c44865495cf1ee84e10d",
+   "measured": 12,
+   "signature": "bce5ec70c2caa248779f",
+   "timed": 6,
+   "tune_seconds": 9.38,
+   "words": 124
+  },
+  "L1.gate": {
+   "cached_cycles": 422369,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 46,
+   "isolated": 422369,
+   "key": "0c9d93e5c61c64dcb950755c55442bc4e8152654fe99b61803688323838eea67",
+   "measured": 12,
+   "signature": "5738576e930bd4f90cc2",
+   "timed": 4,
+   "tune_seconds": 7.72,
+   "words": 132
+  },
+  "L1.h1": {
+   "cached_cycles": 43136,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 43136,
+   "key": "7fb50f376cc9bb6b9d860eb0b5b5d2cf7b1fdfba6487b5ad1b2c6a179477f953",
+   "key_from": "L0.h2",
+   "signature": "4c6b9d85e1538c449cf4",
+   "words": 203
+  },
+  "L1.h2": {
+   "cached_cycles": 43136,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 43136,
+   "key": "7fb50f376cc9bb6b9d860eb0b5b5d2cf7b1fdfba6487b5ad1b2c6a179477f953",
+   "key_from": "L0.h2",
+   "signature": "4c6b9d85e1538c449cf4",
+   "words": 203
+  },
+  "L1.k": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 42,
+   "isolated": 195290,
+   "key": "b4f1772310d69a8b916ae41f4b78cde20779a97a391dd32246be72d0845fe93d",
+   "measured": 12,
+   "signature": "38845c0afd8fe2a7d5b2",
+   "timed": 4,
+   "tune_seconds": 5.26,
+   "words": 122
+  },
+  "L1.kT": {
+   "cached_cycles": 7396,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7396,
+   "key": "84b3439c29b62ab4d67a078bf21ea348427c7e7db96144f36aabd18e3c183f59",
+   "key_from": "L0.kT",
+   "signature": "d0b963b0eae399298318",
+   "words": 116
+  },
+  "L1.kh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "key_from": "L0.kh",
+   "signature": "f082a5f6bcf79ef43af4",
+   "words": 73
+  },
+  "L1.o": {
+   "cached_cycles": 112602,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 43,
+   "isolated": 112602,
+   "key": "d102d6ebc2b5e679e89f09f6e1e8a5560cfec310eac34d880dfec3e4249f5e0c",
+   "measured": 12,
+   "signature": "d18f8da3d791bc33be9b",
+   "timed": 2,
+   "tune_seconds": 2.76,
+   "words": 127
+  },
+  "L1.om.t": {
+   "cached_cycles": 6500,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "strided",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 6500,
+   "key": "99701282f327bb6754003d297a7c8ef8a41a6b1cfb1090e485431cc7e4eda454",
+   "key_from": "L0.om.t",
+   "signature": "1886adc1519ea09db1e2",
+   "words": 45
+  },
+  "L1.out": {
+   "cached_cycles": 20592,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": null,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 11,
+   "isolated": 20592,
+   "key": "0d50fcfdd8b729131460716790ee6ddfb5483399833b38a8e9a76629c0bbac95",
+   "measured": 12,
+   "signature": "83743dcfa29e0da0b422",
+   "timed": 7,
+   "tune_seconds": 2.48,
+   "words": 109
+  },
+  "L1.p": {
+   "cached_cycles": 67998,
+   "candidate": {
+    "params": {
+     "U": 1,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "thread",
+     "r": 1,
+     "tail": "mask"
+    },
+    "sketch": "rows"
+   },
+   "how": "db",
+   "isolated": 67998,
+   "key": "57f29860f25a12f092bf0a344412f6de5d7117b70f8aa56b58859532caf4515d",
+   "key_from": "L0.p",
+   "signature": "982bad222383ea1fc351",
+   "words": 124
+  },
+  "L1.q": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 43,
+   "isolated": 195290,
+   "key": "4f7108ada71e105f3b16b8549cf9982aa68975d7f71c6ab83e35aed8aeffbbbf",
+   "measured": 12,
+   "signature": "008fa3ec3cfa884a02e7",
+   "timed": 4,
+   "tune_seconds": 5.29,
+   "words": 122
+  },
+  "L1.qh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "key_from": "L0.kh",
+   "signature": "f082a5f6bcf79ef43af4",
+   "words": 73
+  },
+  "L1.r1": {
+   "cached_cycles": 20572,
+   "candidate": {
+    "params": {
+     "U": 4,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 32
+    },
+    "sketch": "ew"
+   },
+   "how": "searched",
+   "invalid": 6,
+   "isolated": 20572,
+   "key": "250920f6031b0f57cb670002e0505eec2fef11e611b90a84fbc0edbe21c377c8",
+   "measured": 12,
+   "signature": "6141ffbeeec84aefd85f",
+   "timed": 9,
+   "tune_seconds": 2.2,
+   "words": 108
+  },
+  "L1.scores": {
+   "cached_cycles": 112602,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 42,
+   "isolated": 112602,
+   "key": "d565e2aed1be1b1c7c8b8c0032f3cdac4db4d45cbec526abe5dbd0e1cffa24f3",
+   "measured": 12,
+   "signature": "ea026eefe029b7eea8a4",
+   "timed": 4,
+   "tune_seconds": 6.37,
+   "words": 127
+  },
+  "L1.up": {
+   "cached_cycles": 422369,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 47,
+   "isolated": 422369,
+   "key": "b50350ee091879d7a2f7f7992ee70d7c066e7e060644482d7e955b2fa6e367f0",
+   "measured": 12,
+   "signature": "69afcd61cdb48da8badb",
+   "timed": 4,
+   "tune_seconds": 7.13,
+   "words": 132
+  },
+  "L1.v": {
+   "cached_cycles": 195290,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 2,
+     "kc": 16,
+     "ku": 1,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 49,
+   "isolated": 195290,
+   "key": "418af6056786d08c2523e323cb32bb996a2e1703e977b46c76031b340a690909",
+   "measured": 12,
+   "signature": "0409e8afbb7e94ee9838",
+   "timed": 1,
+   "tune_seconds": 4.34,
+   "words": 122
+  },
+  "L1.vh": {
+   "cached_cycles": 7742,
+   "candidate": {
+    "params": {
+     "U": 8,
+     "ca": 4,
+     "lanes": 4,
+     "mode": "inner",
+     "tail": "mask",
+     "v": 16
+    },
+    "sketch": "ew"
+   },
+   "how": "db",
+   "isolated": 7742,
+   "key": "22a27283a0f8786e09206e201d262627f0f67c768d9906302861f33ad30934cf",
+   "key_from": "L0.kh",
+   "signature": "f082a5f6bcf79ef43af4",
+   "words": 73
+  },
+  "L1.y": {
+   "cached_cycles": 210426,
+   "candidate": {
+    "params": {
+     "U": 16,
+     "ca": 3,
+     "kc": 16,
+     "ku": 4,
+     "lanes": 4,
+     "order": "ij",
+     "stage": "none",
+     "ti": 2,
+     "tj": 2
+    },
+    "sketch": "mm"
+   },
+   "how": "searched",
+   "invalid": 55,
+   "isolated": 210426,
+   "key": "b8d39c56548989d2b5de006e3068d68f5fc441ecdf6b5504a86eeaa255cb2f90",
+   "measured": 12,
+   "signature": "22effc5e2c53ff451073",
+   "timed": 4,
+   "tune_seconds": 6.95,
+   "words": 195
+  }
+ },
+ "mem_latency": 3,
+ "params": {
+  "COALESCE": 0,
+  "DATA_MEM_ADDR_BITS": 16,
+  "DATA_MEM_DATA_BITS": 32,
+  "DCACHE_LINES": 0,
+  "ICACHE_LINES": 0,
+  "MEDIC": 0,
+  "NUM_CORES": 2,
+  "PIPELINED": 0,
+  "SIMT_STACK": 0,
+  "THREADS_PER_BLOCK": 4,
+  "WARPS_PER_CORE": 1,
+  "WARP_POLICY": 0,
+  "WORD_BITS": 32
+ },
+ "run_seconds": 4.5,
+ "seed": 0,
+ "topk": 2,
+ "tune_seconds": 183.5,
+ "verify": {
+  "block_races": 0,
+  "checked": [
+   "L1.out"
+  ],
+  "flags": {
+   "divergent": 0,
+   "race_words": 0,
+   "store_races": 0,
+   "stores_conflict": 0
+  }
+ },
+ "workload": "model"
+}
