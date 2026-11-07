@@ -24,8 +24,8 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG10 | Audit A mediums: masked-lane loads, clean-checkout schedule bug, WORD_BITS, whole-memory checks, compile API guards | — | AUD-A | DONE |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | DONE |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | DONE |
-| SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | IN PROGRESS |
-| AUD-B | Final audit round, then close-out | — | SG8 | TODO |
+| SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | DONE |
+| AUD-B | Final audit round, then close-out | — | SG8 | IN PROGRESS |
 
 End point: audit rounds A and B only. Highs from a round become sub-goals; mediums and lows are recorded with
 strict-xfail repros. No third round.
@@ -310,3 +310,16 @@ fused multiply-add) modelled in a FORK of the ISA model inside the Anvil repo (`
 with codegen idioms switched to use them, re-tuned on the isasim step count plus the tier-1 timing model extended for the
 new op; savings reported per proposal with the caveat that RTL was not changed.
 Accept (G5): `docs/g5-report.md` where every number points at a cached measurement; Pareto plot; ISA table.
+
+SG8 done — **G5 met** (`docs/g5-report.md`, `docs/g5-pareto.svg`). 104 tuned config points, all bit-exact on Verilator.
+Knee for every workload: 2 cores + 32-line I-cache + coalescing + pipelined (MLP 0.73×, attention 0.76×, model 0.64× of
+baseline cycles for 1.12–1.13× state bits); fastest is the same at 4 cores. More warps per core is 2–4× slower at
+TPB = 4. ISA study (model fork, tier-1 timing, RTL unchanged): MAD ≈ 10 % average, MIN 2.8 %, SHL 2.5 %, SLT 0.3 %, AND 0;
+all five ≈ 15–16 %. Coverage reduced for the model (10 points, budget 12). Open: tuner KeyError seeding SIMT_STACK=1
+from SIMT_STACK=0 bests (worked around in codesign); driver detects policies by class name.
+
+### Audit round B (final)
+Separate sessions that wrote none of the code: (1) correctness and regressions since audit A (fuzz + mutants on the
+SG9 wide-residual path, SG10 predication/race fixes, isa_ext), (2) honesty of G1–G5 claims and reports (regenerate,
+re-measure, check every headline against a cached measurement), numerics of contract v2. Highs get fixed; mediums and
+lows are recorded with strict-xfail repros. Then close-out. No further rounds.
