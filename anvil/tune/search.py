@@ -13,7 +13,9 @@ random samples; later generations mutate (one or two knobs re-drawn) and cross o
 consumed in submission order and ties break on (cycles, program words, candidate key).
 
 Ranking hook (SG7): `ranker(task, builts) -> builts to measure, in order`. Default `measure_all`. A ranker sees
-`Built.features()` (static program features) and the candidate; `top_k(score, k)` builds one from a score.
+`Built.features()` (static program features) and the candidate; `top_k(score, k)` builds one from a score. A ranker
+with an `observe(task, built, record)` method is told every measurement's record (cycles or failure) as it comes in:
+the active-learning hook of anvil.cost.ActiveRanker.
 """
 from __future__ import annotations
 
@@ -145,6 +147,7 @@ def tune_kernel(task: Task, *, budget: int = 64, seed: int = 0, workers: int = M
     """Tune one kernel. `extra`: candidates to evaluate in generation 0 (e.g. a previously best one)."""
     t0 = time.time()
     ranker = ranker or measure_all
+    observe = getattr(ranker, "observe", None)       # optional hook: observe(task, built, record) per measurement
     cache = cache if cache is not None else MeasureCache()
     sks = {sk.name: sk for sk in sketches_for(task.kernel, task.target, task.params)}
     rng = random.Random(f"anvil-tune/{seed}/{task.signature}")
@@ -201,6 +204,8 @@ def tune_kernel(task: Task, *, budget: int = 64, seed: int = 0, workers: int = M
         res.cache_hits += len(chosen) - len(todo)
         for b in chosen:
             rec = recs[b.key]
+            if observe is not None:
+                observe(task, b, rec)
             res.measured += 1
             if not rec["ok"]:
                 res.failed += 1

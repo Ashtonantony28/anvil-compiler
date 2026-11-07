@@ -1,0 +1,159 @@
+{
+ "c00": {
+  "mem_latency": 0,
+  "params": {},
+  "split": "train"
+ },
+ "c01": {
+  "mem_latency": 0,
+  "params": {
+   "COALESCE": 1
+  },
+  "split": "train"
+ },
+ "c02": {
+  "mem_latency": 0,
+  "params": {
+   "DCACHE_LINES": 16
+  },
+  "split": "train"
+ },
+ "c03": {
+  "mem_latency": 0,
+  "params": {
+   "COALESCE": 1,
+   "DCACHE_LINES": 16
+  },
+  "split": "train"
+ },
+ "c04": {
+  "mem_latency": 0,
+  "params": {
+   "NUM_CORES": 1
+  },
+  "split": "train"
+ },
+ "c05": {
+  "mem_latency": 0,
+  "params": {
+   "NUM_CORES": 4
+  },
+  "split": "train"
+ },
+ "c06": {
+  "mem_latency": 0,
+  "params": {
+   "ICACHE_LINES": 16
+  },
+  "split": "train"
+ },
+ "c07": {
+  "mem_latency": 0,
+  "params": {
+   "PIPELINED": 1
+  },
+  "split": "train"
+ },
+ "c08": {
+  "mem_latency": 3,
+  "params": {},
+  "split": "train"
+ },
+ "c09": {
+  "mem_latency": 3,
+  "params": {
+   "COALESCE": 1,
+   "NUM_CORES": 4
+  },
+  "split": "train"
+ },
+ "c10": {
+  "mem_latency": 3,
+  "params": {
+   "DCACHE_LINES": 16,
+   "ICACHE_LINES": 16,
+   "PIPELINED": 1
+  },
+  "split": "train"
+ },
+ "c11": {
+  "mem_latency": 3,
+  "params": {
+   "ICACHE_LINES": 16,
+   "NUM_CORES": 1
+  },
+  "split": "train"
+ },
+ "c12": {
+  "mem_latency": 0,
+  "params": {
+   "WARPS_PER_CORE": 2,
+   "WARP_POLICY": 0
+  },
+  "split": "train"
+ },
+ "c13": {
+  "mem_latency": 0,
+  "params": {
+   "WARPS_PER_CORE": 4,
+   "WARP_POLICY": 1
+  },
+  "split": "train"
+ },
+ "c14": {
+  "mem_latency": 3,
+  "params": {
+   "ICACHE_LINES": 16,
+   "WARPS_PER_CORE": 2,
+   "WARP_POLICY": 2
+  },
+  "split": "train"
+ },
+ "c15": {
+  "mem_latency": 0,
+  "params": {
+   "COALESCE": 1,
+   "NUM_CORES": 4,
+   "WARPS_PER_CORE": 4,
+   "WARP_POLICY": 0
+  },
+  "split": "train"
+ },
+ "h0": {
+  "mem_latency": 3,
+  "params": {
+   "COALESCE": 1,
+   "DCACHE_LINES": 16,
+   "ICACHE_LINES": 16,
+   "NUM_CORES": 4
+  },
+  "split": "test"
+ },
+ "h1": {
+  "mem_latency": 0,
+  "params": {
+   "DCACHE_LINES": 8,
+   "PIPELINED": 1
+  },
+  "split": "test"
+ },
+ "h2": {
+  "mem_latency": 3,
+  "params": {
+   "NUM_CORES": 1,
+   "WARPS_PER_CORE": 2,
+   "WARP_POLICY": 1
+  },
+  "split": "test"
+ },
+ "h3": {
+  "mem_latency": 0,
+  "params": {
+   "DCACHE_LINES": 16,
+   "ICACHE_LINES": 16,
+   "WARPS_PER_CORE": 4,
+   "WARP_POLICY": 2
+  },
+  "split": "test"
+ }
+}

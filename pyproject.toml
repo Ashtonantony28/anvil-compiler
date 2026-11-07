@@ -8,6 +8,7 @@ dependencies = ["numpy", "xdsl==0.75.0"]
 [project.optional-dependencies]
 dev = ["pytest", "hypothesis", "cocotb==2.0.1"]
 torch = ["torch"]
+cost = ["lightgbm", "scipy", "xgboost"]
 
 [tool.setuptools.packages.find]
 include = ["anvil*"]
