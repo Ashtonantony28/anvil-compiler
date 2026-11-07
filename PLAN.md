@@ -16,7 +16,7 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG3a | Graph → tensor lowering and schedule primitives | M3 | SG1 | DONE |
 | SG3b | Tensor → MIR lowering (codegen), end to end on isasim/RTL | M3 | SG2, SG3a | DONE |
 | SG4a | Frontend: torch.export capture and quantization to graph IR | M4 | SG1 | DONE |
-| SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | IN PROGRESS |
+| SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | DONE |
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | IN PROGRESS |
 | SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | TODO |
 | AUD-A | Audit round A (4 lenses) | — | SG5 | TODO |
@@ -201,3 +201,8 @@ Accept (G1): nanoGPT `Block` → `anvil.compile` → RTL (iverilog) for the MLP 
 golden-equal to the xf fixtures and within contract-8 tolerances vs PyTorch, with no hand-written assembly; planned
 footprint ≤ the xf images' sizes; Verilator cycle table for the compiled chains next to the hand chains.
 Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" tests/driver`
+
+Done — **G1 met.** From the nanoGPT Block, both workloads run on iverilog RTL golden-equal and within contract-8
+tolerance with no hand-written assembly. Verilator vs hand chains (`docs/g1-report.md`): MLP tiled 35,084 vs 40,329
+(0.87×), attention tiled 31,668 vs 39,498 (0.80×). Footprints 1,935 / 1,720 words (≤ 2,005 / 1,847). The driver already
+runs SG5a's 2-layer d=32 two-head model at 16-bit addresses (30,072 words, 40 kernels) bit-exactly on isasim.
