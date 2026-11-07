@@ -19,7 +19,9 @@ submodule, D3 no FPGA (M9 skipped), D4 d=32 / 2 heads / T=16 / 2 layers, D5 the 
 | SG4b | Memory plan, launch chain, compile driver; xf workloads from PyTorch on RTL (G1) | M4 | SG3b, SG4a | DONE |
 | SG5a | Multi-head + full Block at graph/tensor level, derived tolerance | M5 | SG4a, SG3a | DONE |
 | SG5b | Full 2-layer d=32 model compiled and run on RTL (G2) | M5 | SG4b, SG5a | DONE |
-| AUD-A | Audit round A (4 lenses) | — | SG5 | IN PROGRESS |
+| AUD-A | Audit round A (4 lenses) | — | SG5 | DONE (AUDIT-A1, AUDIT-A2) |
+| SG9 | AUDIT-A2 H1: accuracy for small inputs (σ down to 0.02) | — | AUD-A | IN PROGRESS |
+| SG10 | Audit A mediums: masked-lane loads, clean-checkout schedule bug, WORD_BITS, whole-memory checks, compile API guards | — | AUD-A | IN PROGRESS |
 | SG6 | Autotuner and measurement cache (G3) | M6 | SG4 | DONE |
 | SG7 | Cost models: analytic + GBDT (G4) | M7 | SG6 | DONE |
 | SG8 | Co-design sweep and ISA proposals (G5) | M8 | SG7 | TODO |
@@ -228,7 +230,7 @@ Verify: `make check && NANOGPT_DIR=... python3 -m pytest -q -m "rtl or torch" te
 
 Done — **G3 met, stretch met.** Tuned MLP chain 24,720 cycles (0.61× hand tiled 40,329); attention 22,549 (0.57×);
 1×8×8 picks naive-style (1,148). `docs/g3-report.md`. Open (audit A): search not fully converged at budget 200;
-isasim and RTL disagree on scratch words written by masked-off lanes (results unaffected; simulator-side, uninvestigated);
+isasim and RTL disagree on scratch words written by masked-off lanes (AUDIT-A1 M1: a compiler bug, masked lanes load out of bounds; fixed in SG10);
 programs now hit the 256-word limit; committed best schedules are keyed by kernel IR.
 
 ### SG5b — Full model on RTL (G2)
@@ -262,3 +264,28 @@ Caveat for audit A: tier 1 costs about as much wall time as a Verilator run, so 
 time; the honest learned-model result is tier2_static (no event model): τ ≥ 0.956 pooled, worst within-kernel 0.732
 (h3), MAPE 2.6 %, ratio 0.062. SIMT_STACK=1 not modelled; MEDIC unvalidated; 8 rows off by ≤ 27 cycles
 (COALESCE + L1-D). Dataset 43,830 rows, 55 kernels, 20 configs (`data/cost/`).
+
+### Audit round A (2026-11-07)
+AUDIT-A1 (correctness: 1,490 fuzz cases with no live-output mismatch; 32 seeded mutants, 91 % killed) and AUDIT-A2
+(numerics, performance honesty, API/docs). One high (A2-H1) → SG9. The mediums are cheap and touch correctness or
+honesty, so they are fixed in SG10 rather than only recorded. Lows stay recorded in the two reports.
+Defensible headlines after audit A: G4 is stated on tier2_static (τ 0.956–0.999 pooled, 6.2 % of random search's
+measurements), not tier 1; G3 ratios are reported against both hand chains.
+
+### SG9 — AUDIT-A2 H1: small-input accuracy
+Below σ = 0.5 the int8 residual stream's rounding, amplified by the next RMSNorm, exceeds TOL (σ = 0.05 → 8.4 LSB);
+nanoGPT's own embeddings are σ ≈ 0.02. Investigate and pick the simplest fix that keeps every int32 bound provable
+(options: wider residual stream within 32-bit words with a rescaled RMSNorm sum of squares, per-token scales,
+calibration over a σ range); update the model contract (TOL, σ domain, SEGMENTS) by re-deriving on fresh seeds, and keep
+the xf fixtures bit-exact (their contract is separate). Also A2-M1: run per-segment gain/RMS checks on compiled
+(G1/G2) outputs, not only the graph interpreter, and A2-L2: commit the TOL/SEGMENTS derivation code.
+Accept: A2-H1 and A2-M1 xfails pass; TOL holds on ≥ 200k held-out inputs over σ ∈ [0.02, 3]; G2 re-run bit-exact.
+
+### SG10 — Audit A mediums
+A1-M1 (masked-off lanes must not load: clamp or predicate addresses; add the cross-core read/write checker the design
+promised), A2-M8 (`split(mask)` + `compute_at` legality bug that fails `make check` from a clean checkout), A1-M2
+(reject or support WORD_BITS < 32), A1-M3 (whole-memory comparison outside named buffers in codegen/driver/G2/tuner
+checks), A2-M4..M7 (`anvil.compile` on graph IR runs the overflow proof; `run(quantized=True)` validates inputs; missing
+consts and unknown keywords raise), A2-M2/M3 (G4 report headlines tier2_static; dedupe feature-identical twins across
+the split and re-report). Re-generate any committed best schedules/reports the fixes change.
+Accept: every A1/A2 medium xfail passes; `make check` green from a clean checkout; G1–G4 reports regenerated.
