@@ -14,4 +14,5 @@ include = ["anvil*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-markers = ["rtl: runs the RTL simulator (slow)", "torch: needs torch and NANOGPT_DIR"]
+markers = ["rtl: runs the RTL simulator (slow)", "torch: needs torch and NANOGPT_DIR",
+           "slow: minutes of iverilog (the full model); deselect with -m \"not slow\""]
