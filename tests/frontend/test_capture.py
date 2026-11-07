@@ -94,7 +94,10 @@ def test_stray_primitive_outside_pattern_rejected():
         capture(M(), (_x(),))
 
 
-def test_multihead_not_lowered_yet():
+@pytest.mark.parametrize("nh", [1, 2, 4])
+def test_multihead_captured_and_quantized(nh):
+    """SG5a: nanoGPT attention with n_head in {1, 2, 4} captures, quantizes to head-batched graph IR (ADR-003),
+    proves no overflow, stays within the attention tolerance and runs batched == per sample."""
     from anvil.frontend import capture, quantize
 
     sys.path.insert(0, nanogpt_dir())
@@ -102,7 +105,7 @@ def test_multihead_not_lowered_yet():
     from models.gpt import Block
 
     torch.manual_seed(0)
-    cfg = GPTConfig(block_size=T, n_layer=1, n_head=2, n_embd=D, dropout=0.0, bias=False, pos_embedding="none",
+    cfg = GPTConfig(block_size=T, n_layer=1, n_head=nh, n_embd=D, dropout=0.0, bias=False, pos_embedding="none",
                     norm_type="rmsnorm", activation="swiglu")
     blk = Block(cfg).double().eval()
 
@@ -115,11 +118,30 @@ def test_multihead_not_lowered_yet():
             return self.b.attn(self.b.ln_1(x))
 
     fg = capture(Head(), (_x(),))
-    assert _ops(fg).count("split_heads") == 3 and _ops(fg).count("merge_heads") == 1
-    assert fg.node("scaled_dot_product_attention.scores").attrs["factor"] == ("inv_sqrt", 4)
+    split = 3 if nh > 1 else 0
+    assert _ops(fg).count("split_heads") == split and _ops(fg).count("merge_heads") == split // 3
+    assert fg.node("scaled_dot_product_attention.scores").attrs["factor"] == ("inv_sqrt", D // nh)
     _check_float(fg, Head())
-    with pytest.raises(NotImplementedError, match="SG5"):
-        quantize(fg, calib("attention")[:256])
+    q = quantize(fg, calib("attention")[:1 << 14])
+    hd = D // nh
+    scores = q.module.ops.first.body.block
+    shapes = {op.sym_str: g_dims(op) for op in scores.ops if getattr(op, "sym_str", None)}
+    assert shapes["scaled_dot_product_attention.scores"] == ([nh, T, T] if nh > 1 else [T, T])
+    assert shapes["scaled_dot_product_attention"] == ([nh, T, hd] if nh > 1 else [T, D])
+    assert "scaled_dot_product_attention.scores" in q.bounds
+    assert _int_error_lsb(q, Head()) <= 6
+    xq = np.random.default_rng(9).integers(-128, 128, (5, T, D))
+    batched = gi.run(q.module, {"x": xq}, q.consts, batch=True)
+    for i, x in enumerate(xq):
+        one = gi.run(q.module, {"x": x}, q.consts)
+        assert all(np.array_equal(batched.values[k][i] if k not in q.consts else batched.values[k], v)
+                   for k, v in one.values.items())
+
+
+def g_dims(op):
+    from anvil.ir.graph import qt
+
+    return qt(op.results[0]).dims
 
 
 # ------------------------------------------------------------------------------------------------ patterns

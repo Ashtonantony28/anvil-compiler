@@ -57,6 +57,22 @@ def test_batched_inputs(block):
             assert np.array_equal(got.values[k], v), k
 
 
+@pytest.mark.parametrize("block", GOLDEN)
+def test_batch_mode_equals_per_sample(block):
+    """run(batch=True) over a leading batch dim (SG5a) is bit-identical to per-sample runs and to golden."""
+    img = _load(block, 0)["image"]
+    xs = np.random.default_rng(1).integers(-128, 128, (7, *img.segments["x"]["shape"]))
+    module, consts = from_image.BLOCKS[block](img)
+    got = gi.run(module, {"x": xs}, consts, batch=True)
+    want = GOLDEN[block](img, xs)
+    for k, v in want.items():
+        assert np.array_equal(got.values[k], v), k
+    for i, x in enumerate(xs):
+        one = gi.run(module, {"x": x}, consts)
+        for k, v in one.values.items():
+            assert np.array_equal(got.values[k] if k in consts else got.values[k][i], v), k
+
+
 def test_saturating_extremes():
     d = _load("mlp_block", 0)
     img = d["image"]

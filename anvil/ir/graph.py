@@ -7,7 +7,9 @@ metadata. Requant constants (M, s) are op properties, so the graph is self-descr
     func  {sym_name}                      container, one block
     input {sym}                    -> t   graph input
     const {sym[, value]}           -> t   weight / LUT / any constant tensor
-    qmatmul (a, b[, lut]) {M, s}   -> i8  requant(a @ b, M, s), optional fused lut[. + 128] epilogue
+    qmatmul (a, b[, lut]) {M, s}   -> i8  requant(a @ b, M, s), optional fused lut[. + 128] epilogue;
+                                          a (..., M, K) @ b (K, N), or head-batched b (..., K, N) with the
+                                          same leading dims as a (ADR-003: one op over every head)
     qlinear (x, w[, lut]) {M, s}   -> i8  qmatmul whose w is a const (x @ W, W is (in, out))
     lut     (x, table)             -> i8  table[x + 128], 256 int8 entries
     lut_mul (x, y, table) {M, s}   -> i8  requant(table[x + 128] * y, M, s)          (SwiGLU)
@@ -182,9 +184,11 @@ class _MatmulBase(_GraphOp):
     def verify_(self):
         a, b, r = qt(self.a), qt(self.b), qt(self.result)
         _expect(self, a.dtype == b.dtype == r.dtype == "i8", "operands and result must be i8")
-        _expect(self, len(a.dims) >= 2 and len(b.dims) == 2, f"shapes {a.dims} @ {b.dims}: need (..., M, K) @ (K, N)")
-        _expect(self, a.dims[-1] == b.dims[0], f"contraction mismatch {a.dims} @ {b.dims}")
-        _expect(self, r.dims == a.dims[:-1] + [b.dims[1]], f"result {r.dims} != {a.dims[:-1] + [b.dims[1]]}")
+        _expect(self, len(a.dims) >= 2 and (len(b.dims) == 2 or (len(b.dims) == len(a.dims) and
+                                                                 b.dims[:-2] == a.dims[:-2])),
+                f"shapes {a.dims} @ {b.dims}: need (..., M, K) @ (K, N) or (..., M, K) @ (..., K, N)")
+        _expect(self, a.dims[-1] == b.dims[-2], f"contraction mismatch {a.dims} @ {b.dims}")
+        _expect(self, r.dims == a.dims[:-1] + [b.dims[-1]], f"result {r.dims} != {a.dims[:-1] + [b.dims[-1]]}")
         _check_shift(self, "s")
         if self.lut is not None:
             _lut256_i8(self, self.lut)
@@ -202,6 +206,7 @@ class QLinearOp(_MatmulBase):
     def verify_(self):
         super().verify_()
         _expect(self, isinstance(self.b.owner, ConstOp), "weight operand must be an anvil.graph.const")
+        _expect(self, len(qt(self.b).dims) == 2, "weight operand must be (K, N)")
 
 
 @irdl_op_definition
@@ -371,7 +376,7 @@ class GraphBuilder:
                                  result_types=[QTensorType(shape, dtype, scale)]))
 
     def _mm(self, cls, sym, a, b, m, s, scale, lut):
-        out = qt(a).dims[:-1] + [qt(b).dims[1]]
+        out = qt(a).dims[:-1] + [qt(b).dims[-1]]
         return self._add(cls(operands=[a, b, [lut] if lut is not None else []],
                              properties=self._props(sym, M=_iattr(m), s=_iattr(s)),
                              result_types=[QTensorType(out, "i8", scale)]))

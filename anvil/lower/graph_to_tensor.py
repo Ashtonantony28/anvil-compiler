@@ -7,7 +7,8 @@ Default loop nests are unscheduled: every loop is `seq`, has lb 0 / step 1, a un
 `Kernel.kinds` ("spatial": iterations independent, each writes its own outputs; "reduce": iterations accumulate
 into a register). Schedules (anvil.schedule) rewrite them.
 
-    qmatmul / qlinear  loops b*, i, j (spatial), k (reduce):  acc = sum a*w; c = [lut[]](requant(acc, M, s))
+    qmatmul / qlinear  loops b*, i, j (spatial), k (reduce):  acc = sum a*w; c = [lut[]](requant(acc, M, s));
+                       a head-batched b (..., K, N) is indexed by the same b* ivs as a
     lut, lut_mul, add_requant, transpose   loops d0..dn (spatial) over the output, one store per element
     rmsnorm_int  stage `stat` (stat.b*, stat.i spatial; stat.j reduce) writes per-row temps <sym>.rs (rsqrt LUT
                  value) and <sym>.k (shift); stage `norm` (b*, i, j) reads them
@@ -239,14 +240,16 @@ def _matmul(L, op, sym):
     a, w = k.src(op.a), k.src(op.b)
     lut = None if op.lut is None else k.src(op.lut)
     c = k.dst(op.result)
-    adims, (K, N) = g.qt(op.a).dims, g.qt(op.b).dims
+    adims, bdims = g.qt(op.a).dims, g.qt(op.b).dims
+    K, N = bdims[-2:]
     batch, M = adims[:-2], adims[-2]
     ivs, ctx = k.loops(batch + [M, N], [f"b{n}" for n in range(len(batch))] + ["i", "j"])
     acc = k.acc(0)
     kv, kc = k.loops([K], ["k"], "reduce")
     nb = len(batch)
     av = k.load(a, ivs[:-1] + kv, amap(nb + 2, lambda d: d))
-    wv = k.load(w, [kv[0], ivs[-1]])
+    wb = ivs[:nb] if len(bdims) > 2 else []          # head-batched b (..., K, N): same batch ivs as a
+    wv = k.load(w, wb + [kv[0], ivs[-1]])
     k.acc_update(acc, "add", b.mul(av, wv))
     k.close(kc)
     r = b.requant(k.acc_load(acc), _i(op.M), _i(op.s))

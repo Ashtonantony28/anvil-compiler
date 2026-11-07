@@ -14,6 +14,10 @@ int32 bound from the finished graph and raises OverflowError naming the op if an
 
 Fusions: mul(silu(a), b) -> lut_mul; a scalar factor on a matmul folds into its multiplier; transpose keeps its
 input's scale; softmax output has scale 1/one.
+
+Multi-head (SG5a, ADR-003): split_heads -> reshape '<sym>.r' (T, nh, hd) + transpose '<sym>' (nh, T, hd);
+merge_heads -> transpose '<sym>.t' (T, nh, hd) + reshape '<sym>' (T, C). Scores and p @ v are head-batched
+qmatmuls; every value keeps one per-tensor scale across heads.
 """
 from __future__ import annotations
 
@@ -190,8 +194,12 @@ class Quantized:
         return {self.syms[k]: v.detach().numpy() for k, v in acts.items() if k in self.syms}
 
 
-def _calibrate(fg, calib_inputs):
-    """-> (input scales, {node name: float activation}) on the fake-quantized calibration inputs."""
+CALIB_CHUNK = 8192
+
+
+def _calibrate(fg, calib_inputs, chunk=CALIB_CHUNK):
+    """-> (input scales, {node name: max |float activation|}) on the fake-quantized calibration inputs,
+    evaluated `chunk` samples at a time (max-abs is chunk-invariant, so the result does not depend on it)."""
     import torch
 
     if not isinstance(calib_inputs, (list, tuple)):
@@ -205,9 +213,13 @@ def _calibrate(fg, calib_inputs):
             raise ValueError(f"calibration input {n.name}: shape {c.shape[1:]} != {n.shape} (plus a batch dim)")
         sin[n.name] = maxabs_scale(c)
         deq.append(quantize_array(c, sin[n.name]) * sin[n.name])
-    with torch.no_grad():
-        acts = fg.evaluate(deq)
-    return sin, acts
+    amax = {}
+    for lo in range(0, len(deq[0]), chunk):
+        with torch.no_grad():
+            acts = fg.evaluate([d[lo:lo + chunk] for d in deq])
+        for k, v in _act_maxabs(fg, acts).items():
+            amax[k] = max(amax.get(k, 0.0), v)
+    return sin, amax
 
 
 def _act_maxabs(fg, acts):
@@ -236,9 +248,7 @@ def quantize(fg, calib_inputs, headroom=HEADROOM, *, names=None, softmax_one=SOF
     sym = {n.name: names.get(n.name, n.name) for n in fg.nodes}
     if len(set(sym.values())) != len(sym):
         raise ValueError("names map two nodes to one sym")
-    sin, acts = _calibrate(fg, calib_inputs)
-    amax = _act_maxabs(fg, acts)
-    del acts
+    sin, amax = _calibrate(fg, calib_inputs)
 
     users = {n.name: fg.users(n) for n in fg.nodes}
     fused_silu = {n.name for n in fg.nodes if n.op == "silu" and users[n.name]
@@ -346,15 +356,23 @@ def quantize(fg, calib_inputs, headroom=HEADROOM, *, names=None, softmax_one=SOF
             so = act_scale(n)
             (ma, mb), s = fixed_point([sc_in[0] / so, sc_in[1] / so], [mag[n.inputs[0].name], mag[n.inputs[1].name]])
             v = b.add_requant(s_name, ins[0], ins[1], ma, mb, s, so)
-        elif n.op in ("split_heads", "merge_heads"):
-            raise NotImplementedError(f"{n.name}: {n.op} (n_head = {n.attrs['nh']}) has no anvil.graph lowering "
-                                      "yet (multi-head is SG5)")
+        elif n.op == "split_heads":                  # (T, C) -> view (T, nh, hd) -> transpose (nh, T, hd)
+            so, nh = sc_in[0], n.attrs["nh"]
+            T_, C = n.inputs[0].shape[-2:]
+            r = b.reshape(f"{s_name}.r", ins[0], [*n.inputs[0].shape[:-1], nh, C // nh], so)
+            rank = len(n.inputs[0].shape) + 1
+            v = b.transpose(s_name, r, list(range(rank - 3)) + [rank - 2, rank - 3, rank - 1], so)
+        elif n.op == "merge_heads":                  # (nh, T, hd) -> transpose (T, nh, hd) -> view (T, C)
+            so, rank = sc_in[0], len(n.inputs[0].shape)
+            tr = b.transpose(f"{s_name}.t", ins[0], list(range(rank - 3)) + [rank - 2, rank - 3, rank - 1], so)
+            v = b.reshape(s_name, tr, list(n.shape), so)
         else:
             raise NotImplementedError(f"{n.name}: frontend op {n.op}")
         ir[n.name] = v
         scales[s_name] = so
         mag[n.name] = softmax_one if n.op == "softmax" else (mag[n.inputs[0].name] if n.op in
-                                                              ("transpose", "reshape") else 128)
+                                                              ("transpose", "reshape", "split_heads",
+                                                               "merge_heads") else 128)
     b.output(*(ir[o.name] for o in fg.outputs))
     module = b.module()
     bounds = prove_no_overflow(module, consts)

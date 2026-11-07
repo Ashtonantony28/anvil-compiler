@@ -3,7 +3,7 @@
     matmul_naive   one thread per output element, operands straight from global memory (matmul_naive.asm)
     matmul_tiled   4 x G output tile per G-thread group, 4 register accumulators, A staged through smem in G-wide
                    K chunks with BAR before and after each chunk (matmul_tiled.asm, G = 4)
-    elementwise    flatten, one thread per element
+    elementwise    flatten, one thread per element (several per thread, in a seq loop, beyond 255 threads)
     rows_per_thread  rmsnorm/softmax: stages computed at the row loop, one thread per row
     row_per_block    rmsnorm/softmax: one block per row, lanes split the columns, reductions across lanes in smem
     default_schedule(kernel, target)  the default per op kind
@@ -12,8 +12,17 @@ from .schedule import Schedule
 from .target import ScheduleError, Target
 
 
+def _per_thread(n, cap):
+    """Iterations per thread when n > cap threads: the least divisor of n that needs at most cap threads, unless
+    that more than doubles the minimum ceil(n / cap) (then the minimum, with a masked tail)."""
+    lo = -(-n // cap)
+    d = next(d for d in range(lo, n + 1) if n % d == 0)
+    return d if d <= 2 * lo else lo
+
+
 def _flat_threads(s: Schedule, loops, tail="mask"):
-    """Fuse `loops` (a perfect nest, outer first) into one, then split into block x [warp x] lane."""
+    """Fuse `loops` (a perfect nest, outer first) into one, then split into block x [warp x] lane. Beyond one
+    launch's threads (Target.max_threads, SG5a) the fused loop first splits off a per-thread seq loop."""
     tgt = s.target
     name = loops[0]
     for nxt in loops[1:]:
@@ -21,6 +30,12 @@ def _flat_threads(s: Schedule, loops, tail="mask"):
         name = f"{name}_{nxt}"
     tpb, le = tgt.threads_per_block, tgt.lanes_per_warp
     n = dict((x[0], x[1]) for x in s.loops())[name]
+    cap = (tgt.max_threads // tpb) * tpb
+    if n > cap:                                   # more iterations than one launch has threads: each thread
+        per = _per_thread(n, cap)                 # runs a seq loop over `per` consecutive iterations
+        s.split(name, per, tail, outer=f"{name}.par", inner=f"{name}.seq")
+        name = f"{name}.par"
+        n = dict((x[0], x[1]) for x in s.loops())[name]
     if n <= tpb:
         s.split(name, n, tail, outer=f"{name}.blk", inner=f"{name}.thr")
     else:
