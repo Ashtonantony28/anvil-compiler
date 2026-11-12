@@ -4,3 +4,4 @@ build/
 .anvil-cache/
 *.egg-info/
 tests/vortexv/sim_build/
+tests/vortexv/*.result.xml
