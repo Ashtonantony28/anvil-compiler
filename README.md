@@ -9,7 +9,7 @@ The simulator is a pinned submodule; Anvil imports its `xf` package from `sim/`,
 (the tests do this themselves through `tests/conftest.py`).
 
 ```bash
-git submodule update --init                                  # sim/ (tiny-gpu-extended, read-only)
+git submodule update --init                                  # sim/ (tiny-gpu-extended) + vortexv/ (Vortex-V), read-only
 pip install numpy xdsl==0.75.0 pytest hypothesis             # core + tests
 pip install torch cocotb==2.0.1 lightgbm                     # torch frontend, RTL runs, cost models (optional)
 apt-get install -y iverilog verilator                        # plus sv2v 0.0.13: see PLAN.md "Environment"
@@ -33,6 +33,18 @@ print(cm.summary())                # per-kernel schedule, program words, launche
 
 `schedules` is `"default"`, `"tiled"`, `"tuned"` (anvil.tune), a dict per kernel or op, or a callable; see the
 `anvil.driver` docstring. `anvil.runtime.check_races(job)` checks a job for cross-block read/write races.
+
+## Second target: Vortex-V (RISC-V + Xmlacc)
+
+`anvil.vortexv` lowers the same graph IR to one RV64IM + Xmlacc program for
+[Vortex-V](https://github.com/Ashtonantony28/vortex-v) (pinned submodule `vortexv/`). Every graph op is supported,
+and results are bit-exact to the interpreter on Vortex-V's ISS and in lockstep on its RTL cores. This includes the
+2-layer model. Design, checks and cycle counts are in `docs/vortexv-backend.md`.
+
+```python
+from anvil import vortexv
+res = vortexv.compile(module, consts).run({"x": x})       # res.outputs, res.values, res.instret
+```
 
 ## Test
 
