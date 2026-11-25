@@ -3,6 +3,26 @@
 A tensor compiler that lowers PyTorch transformer blocks (nanoGPT Extended) onto the tiny-gpu-extended ISA.
 See `docs/design.md` for the design and `PLAN.md` for status.
 
+## Gallery
+
+![One quantized linear layer through every compiler stage](docs/media/pipeline.png)
+
+*One `qlinear` (1×8×8) through Anvil: graph IR, scheduled loop nest, the `tiled` schedule's transforms, and the register-allocated tiny-gpu assembly. Every panel is the text that stage actually prints for this kernel. The ISA-simulator result is bit-exact with the golden model.*
+
+![How the compiled kernel maps onto tiny-gpu's blocks and lanes](docs/media/execute.gif)
+
+*How that schedule maps onto tiny-gpu: 2 blocks (one per core) × 4 lanes, one output column per lane. This is an illustration of the schedule, not a cycle-level trace. It uses the kernel's real inputs, and the script asserts the final `y` equals the ISA-simulator run. [MP4](docs/media/execute.mp4)*
+
+![Cycles of hand-written kernels vs compiled and autotuned code](docs/media/g3-cycles.png)
+
+*G3: the nanoGPT MLP block and attention head compiled from PyTorch, against the hand-written xf kernels. Cycles come from the Verilator RTL, all bit-exact (`docs/g3-report.md`).*
+
+| Cost-model-guided tuning (G4) | Hardware/software co-design sweep (G5) |
+|---|---|
+| ![G4 curves](docs/g4-curves.svg) | ![G5 Pareto](docs/g5-pareto.svg) |
+
+Regenerate the media with `PYTHONPATH=sim:. python3 tools/media.py`.
+
 ## Install
 
 The simulator is a pinned submodule; Anvil imports its `xf` package from `sim/`, so put `sim` on `PYTHONPATH`
